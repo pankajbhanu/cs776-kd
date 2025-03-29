@@ -1,0 +1,23 @@
+_BASE_: "detectron2/model_zoo/configs/Base-RetinaNet.yaml"
+
+MODEL:
+  META_ARCHITECTURE: "RetinaNet"
+  WEIGHTS: ""  # Path to pretrained weights (optional)
+  RESNETS:
+    DEPTH: 50  # Or 101, etc.
+  RETINANET:
+    NUM_CLASSES: 80  # Number of classes in your dataset (e.g., for COCO)
+    # Other RetinaNet specific parameters can be adjusted here
+
+DATASETS:
+  TRAIN: ("my_dataset_train",)  # Use the name you registered
+  TEST: ("my_dataset_val",)    # Use the name you registered
+
+SOLVER:
+  IMS_PER_BATCH: 1  # Adjust based on your GPU memory
+  BASE_LR: 0.01    # Base learning rate
+  MAX_ITER: 30000  # Maximum number of training iterations
+  STEPS: (20000, 25000) # Learning rate decay steps
+  GAMMA: 0.1       # Learning rate decay factor
+
+OUTPUT_DIR: "./output" # Directory to save training outputs
