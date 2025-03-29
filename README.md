@@ -12,4 +12,12 @@ python -m venv myvenv
 
 source myvenv/bin/activate
 
-install pytorch, cuda, detectron2
+install pytorch, cuda 
+
+cd detectron2
+
+pip install -e .
+
+mkdir dataset # https://github.com/giddyyupp/coco-minitrain
+
+add https://www.kaggle.com/datasets/trungit/coco25k images folder and json in dataset folder
