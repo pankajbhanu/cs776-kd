@@ -1,0 +1,7 @@
+{
+    "python.terminal.activateEnvInCurrentTerminal": true,
+    "python.defaultInterpreterPath": "~/Downloads/cs776/proj/proj776/bin/python",
+    "python.analysis.extraPaths": [
+        "./detectron2"
+    ]
+}
