@@ -5,13 +5,12 @@ from typing import List, Optional, Tuple
 import torch
 import torch.nn as nn
 from mmcv import ops
-from mmengine.model import BaseModule
 from torch import Tensor
 
 from mmdet.utils import ConfigType, OptMultiConfig
 
 
-class BaseRoIExtractor(BaseModule, metaclass=ABCMeta):
+class BaseRoIExtractor(nn.Module):
     """Base class for RoI extractor.
 
     Args:

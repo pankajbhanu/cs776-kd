@@ -3,16 +3,14 @@ from typing import List, Tuple, Union
 
 import torch.nn as nn
 import torch.nn.functional as F
-from mmcv.cnn import ConvModule
-from mmengine.model import BaseModule
 from torch import Tensor
 
-from mmdet.registry import MODELS
-from mmdet.utils import ConfigType, MultiConfig, OptConfigType
+from detectron2.utils.registry import MODELS
+# from mmdet.utils import ConfigType, MultiConfig, OptConfigType
 
 
 @MODELS.register_module()
-class FPN(BaseModule):
+class FPN(nn.Module):
     r"""Feature Pyramid Network.
 
     This is an implementation of paper `Feature Pyramid Networks for Object
@@ -77,14 +75,8 @@ class FPN(BaseModule):
         add_extra_convs: Union[bool, str] = False,
         relu_before_extra_convs: bool = False,
         no_norm_on_lateral: bool = False,
-        conv_cfg: OptConfigType = None,
-        norm_cfg: OptConfigType = None,
-        act_cfg: OptConfigType = None,
-        upsample_cfg: ConfigType = dict(mode='nearest'),
-        init_cfg: MultiConfig = dict(
-            type='Xavier', layer='Conv2d', distribution='uniform')
-    ) -> None:
-        super().__init__(init_cfg=init_cfg)
+        ) -> None:
+        super().__init__()
         assert isinstance(in_channels, list)
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -93,8 +85,6 @@ class FPN(BaseModule):
         self.relu_before_extra_convs = relu_before_extra_convs
         self.no_norm_on_lateral = no_norm_on_lateral
         self.fp16_enabled = False
-        self.upsample_cfg = upsample_cfg.copy()
-
         if end_level == -1 or end_level == self.num_ins - 1:
             self.backbone_end_level = self.num_ins
             assert num_outs >= self.num_ins - start_level
@@ -117,23 +107,15 @@ class FPN(BaseModule):
         self.fpn_convs = nn.ModuleList()
 
         for i in range(self.start_level, self.backbone_end_level):
-            l_conv = ConvModule(
+            l_conv = nn.Conv2d(
                 in_channels[i],
                 out_channels,
-                1,
-                conv_cfg=conv_cfg,
-                norm_cfg=norm_cfg if not self.no_norm_on_lateral else None,
-                act_cfg=act_cfg,
-                inplace=False)
-            fpn_conv = ConvModule(
+                1,)
+            fpn_conv = nn.Conv2d(
                 out_channels,
                 out_channels,
                 3,
-                padding=1,
-                conv_cfg=conv_cfg,
-                norm_cfg=norm_cfg,
-                act_cfg=act_cfg,
-                inplace=False)
+                padding=1)
 
             self.lateral_convs.append(l_conv)
             self.fpn_convs.append(fpn_conv)
@@ -146,16 +128,12 @@ class FPN(BaseModule):
                     in_channels = self.in_channels[self.backbone_end_level - 1]
                 else:
                     in_channels = out_channels
-                extra_fpn_conv = ConvModule(
+                extra_fpn_conv = nn.Conv2d(
                     in_channels,
                     out_channels,
                     3,
                     stride=2,
-                    padding=1,
-                    conv_cfg=conv_cfg,
-                    norm_cfg=norm_cfg,
-                    act_cfg=act_cfg,
-                    inplace=False)
+                    padding=1)
                 self.fpn_convs.append(extra_fpn_conv)
 
     def forward(self, inputs: Tuple[Tensor]) -> tuple:
