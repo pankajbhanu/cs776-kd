@@ -117,7 +117,7 @@ class KnowledgeDistillationKLDivLoss(nn.Module):
         return loss_kd
 
 
-@MODELS.register_module()
+# @MODELS.register_module()
 class KDQualityFocalLoss(nn.Module):
 
     def __init__(self,

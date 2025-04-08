@@ -1,14 +1,12 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
-from mmengine.structures import InstanceData
+from ...structures import InstanceData
 
-from mmdet.registry import TASK_UTILS
 from ..assigners import AssignResult
 from .base_sampler import BaseSampler
 from .sampling_result import SamplingResult
 
 
-@TASK_UTILS.register_module()
 class PseudoSampler(BaseSampler):
     """A pseudo sampler that does not do sampling actually."""
 

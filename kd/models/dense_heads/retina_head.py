@@ -1,12 +1,8 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch.nn as nn
-from mmcv.cnn import ConvModule
-
-from mmdet.registry import MODELS
 from .anchor_head import AnchorHead
 
 
-@MODELS.register_module()
 class RetinaHead(AnchorHead):
     r"""An anchor-based head used in `RetinaNet
     <https://arxiv.org/pdf/1708.02002.pdf>`_.
@@ -69,7 +65,7 @@ class RetinaHead(AnchorHead):
         in_channels = self.in_channels
         for i in range(self.stacked_convs):
             self.cls_convs.append(
-                ConvModule(
+                nn.Conv2d(
                     in_channels,
                     self.feat_channels,
                     3,
@@ -78,7 +74,7 @@ class RetinaHead(AnchorHead):
                     conv_cfg=self.conv_cfg,
                     norm_cfg=self.norm_cfg))
             self.reg_convs.append(
-                ConvModule(
+                nn.Conv2d(
                     in_channels,
                     self.feat_channels,
                     3,

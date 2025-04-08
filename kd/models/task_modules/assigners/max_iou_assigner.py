@@ -2,15 +2,14 @@
 from typing import Optional, Union
 
 import torch
-from mmengine.structures import InstanceData
+from ...structures import InstanceData
 from torch import Tensor
 
-from mmdet.registry import TASK_UTILS
 from .assign_result import AssignResult
 from .base_assigner import BaseAssigner
+from iou2d_calculator import BboxOverlaps2D
 
 
-@TASK_UTILS.register_module()
 class MaxIoUAssigner(BaseAssigner):
     """Assign a corresponding gt bbox or background to each bbox.
 
@@ -50,13 +49,13 @@ class MaxIoUAssigner(BaseAssigner):
     def __init__(self,
                  pos_iou_thr: float,
                  neg_iou_thr: Union[float, tuple],
+                 iou_calculator: BboxOverlaps2D,
                  min_pos_iou: float = .0,
                  gt_max_assign_all: bool = True,
                  ignore_iof_thr: float = -1,
                  ignore_wrt_candidates: bool = True,
                  match_low_quality: bool = True,
-                 gpu_assign_thr: float = -1,
-                 iou_calculator: dict = dict(type='BboxOverlaps2D')):
+                 gpu_assign_thr: float = -1):
         self.pos_iou_thr = pos_iou_thr
         self.neg_iou_thr = neg_iou_thr
         self.min_pos_iou = min_pos_iou
@@ -65,7 +64,7 @@ class MaxIoUAssigner(BaseAssigner):
         self.ignore_wrt_candidates = ignore_wrt_candidates
         self.gpu_assign_thr = gpu_assign_thr
         self.match_low_quality = match_low_quality
-        self.iou_calculator = TASK_UTILS.build(iou_calculator)
+        self.iou_calculator = iou_calculator
 
     def assign(self,
                pred_instances: InstanceData,

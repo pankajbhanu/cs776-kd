@@ -4,21 +4,20 @@ from typing import List, Optional, Tuple, Union
 
 import torch
 import torch.nn as nn
-from mmengine.structures import InstanceData
+from ..structures import InstanceData
 from torch import Tensor
 
-from mmdet.registry import MODELS, TASK_UTILS
-from mmdet.structures.bbox import BaseBoxes, cat_boxes, get_box_tensor
-from mmdet.utils import (ConfigType, InstanceList, OptConfigType,
-                         OptInstanceList, OptMultiConfig)
+from ..structures.bbox import BaseBoxes, cat_boxes, get_box_tensor
+from ..structures import InstanceList, OptInstanceList
 from ..task_modules.prior_generators import (AnchorGenerator,
                                              anchor_inside_flags)
 from ..task_modules.samplers import PseudoSampler
+from ..task_modules.coders import DeltaXYWHBBoxCoder
 from ..utils import images_to_levels, multi_apply, unmap
+from ..losses import CrossEntropyLoss, SmoothL1Loss
 from .base_dense_head import BaseDenseHead
 
 
-@MODELS.register_module()
 class AnchorHead(BaseDenseHead):
     """Anchor-based head (RPN, RetinaNet, SSD, etc.).
 
@@ -45,28 +44,16 @@ class AnchorHead(BaseDenseHead):
         self,
         num_classes: int,
         in_channels: int,
-        feat_channels: int = 256,
-        anchor_generator: ConfigType = dict(
-            type='AnchorGenerator',
-            scales=[8, 16, 32],
-            ratios=[0.5, 1.0, 2.0],
-            strides=[4, 8, 16, 32, 64]),
-        bbox_coder: ConfigType = dict(
-            type='DeltaXYWHBBoxCoder',
-            clip_border=True,
-            target_means=(.0, .0, .0, .0),
-            target_stds=(1.0, 1.0, 1.0, 1.0)),
+        anchor_generator: AnchorGenerator,
+        bbox_coder: DeltaXYWHBBoxCoder,
+        loss_cls: CrossEntropyLoss,
+        loss_bbox: SmoothL1Loss,
+        train_cfg: dict,
+        test_cfg: dict,
         reg_decoded_bbox: bool = False,
-        loss_cls: ConfigType = dict(
-            type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0),
-        loss_bbox: ConfigType = dict(
-            type='SmoothL1Loss', beta=1.0 / 9.0, loss_weight=1.0),
-        train_cfg: OptConfigType = None,
-        test_cfg: OptConfigType = None,
-        init_cfg: OptMultiConfig = dict(
-            type='Normal', layer='Conv2d', std=0.01)
-    ) -> None:
-        super().__init__(init_cfg=init_cfg)
+        feat_channels: int = 256,
+        ) -> None:
+        super().__init__()
         self.in_channels = in_channels
         self.num_classes = num_classes
         self.feat_channels = feat_channels
@@ -80,22 +67,21 @@ class AnchorHead(BaseDenseHead):
             raise ValueError(f'num_classes={num_classes} is too small')
         self.reg_decoded_bbox = reg_decoded_bbox
 
-        self.bbox_coder = TASK_UTILS.build(bbox_coder)
-        self.loss_cls = MODELS.build(loss_cls)
-        self.loss_bbox = MODELS.build(loss_bbox)
+        self.bbox_coder = bbox_coder
+        self.loss_cls = loss_cls 
+        self.loss_bbox = loss_bbox
         self.train_cfg = train_cfg
         self.test_cfg = test_cfg
         if self.train_cfg:
-            self.assigner = TASK_UTILS.build(self.train_cfg['assigner'])
+            self.assigner = self.train_cfg.assigner
             if train_cfg.get('sampler', None) is not None:
-                self.sampler = TASK_UTILS.build(
-                    self.train_cfg['sampler'], default_args=dict(context=self))
+                self.sampler = self.train_cfg.sampler
             else:
                 self.sampler = PseudoSampler(context=self)
 
         self.fp16_enabled = False
 
-        self.prior_generator = TASK_UTILS.build(anchor_generator)
+        self.prior_generator = anchor_generator
 
         # Usually the numbers of anchors for each level are the same
         # except SSD detectors. So it is an int in the most dense

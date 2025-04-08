@@ -1,8 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
 
-from mmdet.registry import TASK_UTILS
-from mmdet.structures.bbox import bbox_overlaps, get_box_tensor
+from ...structures.bbox import bbox_overlaps, get_box_tensor
 
 
 def cast_tensor_type(x, scale=1., dtype=None):
@@ -12,7 +11,6 @@ def cast_tensor_type(x, scale=1., dtype=None):
     return x
 
 
-@TASK_UTILS.register_module()
 class BboxOverlaps2D:
     """2D Overlaps (e.g. IoUs, GIoUs) Calculator."""
 

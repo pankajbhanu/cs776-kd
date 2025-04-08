@@ -1,22 +1,18 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import copy
 from abc import ABCMeta, abstractmethod
-from inspect import signature
 from typing import List, Optional, Tuple
 
 import torch
 import torch.nn as nn
-from mmcv.ops import batched_nms
-from mmengine.config import ConfigDict
-from mmengine.model import BaseModule, constant_init
-from mmengine.structures import InstanceData
+from ..cvops import batched_nms
+from ..structures import InstanceData
 from torch import Tensor
 
-from mmdet.structures import SampleList
-from mmdet.structures.bbox import (cat_boxes, get_box_tensor, get_box_wh,
+from ..structures import SampleList
+from ..structures.bbox import (cat_boxes, get_box_tensor, get_box_wh,
                                    scale_boxes)
-from mmdet.utils import InstanceList, OptMultiConfig
-from ..test_time_augs import merge_aug_results
+from ..utils import InstanceList, OptMultiConfig
 from ..utils import (filter_scores_and_topk, select_single_mlvl,
                      unpack_gt_instances)
 
@@ -67,11 +63,6 @@ class BaseDenseHead(nn.Module, metaclass=ABCMeta):
     def init_weights(self) -> None:
         """Initialize the weights."""
         super().init_weights()
-        # avoid init_cfg overwrite the initialization of `conv_offset`
-        for m in self.modules():
-            # DeformConv2dPack, ModulatedDeformConv2dPack
-            if hasattr(m, 'conv_offset'):
-                constant_init(m.conv_offset, 0)
 
     def get_positive_infos(self) -> InstanceList:
         """Get positive information from sampling results.
@@ -134,7 +125,7 @@ class BaseDenseHead(nn.Module, metaclass=ABCMeta):
         self,
         x: Tuple[Tensor],
         batch_data_samples: SampleList,
-        proposal_cfg: Optional[ConfigDict] = None
+        proposal_cfg: Optional[dict] = None
     ) -> Tuple[dict, InstanceList]:
         """Perform forward propagation of the head, then calculate loss and
         predictions from the features and data samples.
@@ -144,7 +135,7 @@ class BaseDenseHead(nn.Module, metaclass=ABCMeta):
             batch_data_samples (list[:obj:`DetDataSample`]): Each item contains
                 the meta information of each image and corresponding
                 annotations.
-            proposal_cfg (ConfigDict, optional): Test / postprocessing
+            proposal_cfg (dict, optional): Test / postprocessing
                 configuration, if None, test_cfg would be used.
                 Defaults to None.
 
@@ -204,7 +195,7 @@ class BaseDenseHead(nn.Module, metaclass=ABCMeta):
                         bbox_preds: List[Tensor],
                         score_factors: Optional[List[Tensor]] = None,
                         batch_img_metas: Optional[List[dict]] = None,
-                        cfg: Optional[ConfigDict] = None,
+                        cfg: Optional[dict] = None,
                         rescale: bool = False,
                         with_nms: bool = True) -> InstanceList:
         """Transform a batch of output features extracted from the head into
@@ -226,7 +217,7 @@ class BaseDenseHead(nn.Module, metaclass=ABCMeta):
                 (batch_size, num_priors * 1, H, W). Defaults to None.
             batch_img_metas (list[dict], Optional): Batch image meta info.
                 Defaults to None.
-            cfg (ConfigDict, optional): Test / postprocessing
+            cfg (dict, optional): Test / postprocessing
                 configuration, if None, test_cfg would be used.
                 Defaults to None.
             rescale (bool): If True, return boxes in original image space.
@@ -295,7 +286,7 @@ class BaseDenseHead(nn.Module, metaclass=ABCMeta):
                                 score_factor_list: List[Tensor],
                                 mlvl_priors: List[Tensor],
                                 img_meta: dict,
-                                cfg: ConfigDict,
+                                cfg: dict,
                                 rescale: bool = False,
                                 with_nms: bool = True) -> InstanceData:
         """Transform a single image's features extracted from the head into
@@ -424,7 +415,7 @@ class BaseDenseHead(nn.Module, metaclass=ABCMeta):
 
     def _bbox_post_process(self,
                            results: InstanceData,
-                           cfg: ConfigDict,
+                           cfg: dict,
                            rescale: bool = False,
                            with_nms: bool = True,
                            img_meta: Optional[dict] = None) -> InstanceData:
@@ -436,7 +427,7 @@ class BaseDenseHead(nn.Module, metaclass=ABCMeta):
         Args:
             results (:obj:`InstaceData`): Detection instance results,
                 each item has shape (num_bboxes, ).
-            cfg (ConfigDict): Test / postprocessing configuration,
+            cfg (dict): Test / postprocessing configuration,
                 if None, test_cfg would be used.
             rescale (bool): If True, return boxes in original image space.
                 Default to False.
@@ -485,94 +476,3 @@ class BaseDenseHead(nn.Module, metaclass=ABCMeta):
             results = results[:cfg.max_per_img]
 
         return results
-
-    def aug_test(self,
-                 aug_batch_feats,
-                 aug_batch_img_metas,
-                 rescale=False,
-                 with_ori_nms=False,
-                 **kwargs):
-        """Test function with test time augmentation.
-
-        Args:
-            aug_batch_feats (list[tuple[Tensor]]): The outer list
-                indicates test-time augmentations and inner tuple
-                indicate the multi-level feats from
-                FPN, each Tensor should have a shape (B, C, H, W),
-            aug_batch_img_metas (list[list[dict]]): Meta information
-                of images under the different test-time augs
-                (multiscale, flip, etc.). The outer list indicate
-                the
-            rescale (bool, optional): Whether to rescale the results.
-                Defaults to False.
-            with_ori_nms (bool): Whether execute the nms in original head.
-                Defaults to False. It will be `True` when the head is
-                adopted as `rpn_head`.
-
-        Returns:
-            list(obj:`InstanceData`): Detection results of the
-            input images. Each item usually contains\
-            following keys.
-
-                - scores (Tensor): Classification scores, has a shape
-                  (num_instance,)
-                - labels (Tensor): Labels of bboxes, has a shape
-                  (num_instances,).
-                - bboxes (Tensor): Has a shape (num_instances, 4),
-                  the last dimension 4 arrange as (x1, y1, x2, y2).
-        """
-        # TODO: remove this for detr and deformdetr
-        sig_of_get_results = signature(self.get_results)
-        get_results_args = [
-            p.name for p in sig_of_get_results.parameters.values()
-        ]
-        get_results_single_sig = signature(self._get_results_single)
-        get_results_single_sig_args = [
-            p.name for p in get_results_single_sig.parameters.values()
-        ]
-        assert ('with_nms' in get_results_args) and \
-               ('with_nms' in get_results_single_sig_args), \
-               f'{self.__class__.__name__}' \
-               'does not support test-time augmentation '
-
-        num_imgs = len(aug_batch_img_metas[0])
-        aug_batch_results = []
-        for x, img_metas in zip(aug_batch_feats, aug_batch_img_metas):
-            outs = self.forward(x)
-            batch_instance_results = self.get_results(
-                *outs,
-                img_metas=img_metas,
-                cfg=self.test_cfg,
-                rescale=False,
-                with_nms=with_ori_nms,
-                **kwargs)
-            aug_batch_results.append(batch_instance_results)
-
-        # after merging, bboxes will be rescaled to the original image
-        batch_results = merge_aug_results(aug_batch_results,
-                                          aug_batch_img_metas)
-
-        final_results = []
-        for img_id in range(num_imgs):
-            results = batch_results[img_id]
-            det_bboxes, keep_idxs = batched_nms(results.bboxes, results.scores,
-                                                results.labels,
-                                                self.test_cfg.nms)
-            results = results[keep_idxs]
-            # some nms operation may reweight the score such as softnms
-            results.scores = det_bboxes[:, -1]
-            results = results[:self.test_cfg.max_per_img]
-            if rescale:
-                # all results have been mapped to the original scale
-                # in `merge_aug_results`, so just pass
-                pass
-            else:
-                # map to the first aug image scale
-                scale_factor = results.bboxes.new_tensor(
-                    aug_batch_img_metas[0][img_id]['scale_factor'])
-                results.bboxes = \
-                    results.bboxes * scale_factor
-
-            final_results.append(results)
-
-        return final_results
