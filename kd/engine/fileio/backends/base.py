@@ -1,8 +1,8 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import logging
+# import logging
 from abc import ABCMeta, abstractmethod
 
-from ..logging import print_log
+from ... import kdlogger
 
 
 class BaseStorageBackend(metaclass=ABCMeta):
@@ -21,10 +21,10 @@ class BaseStorageBackend(metaclass=ABCMeta):
 
     @property
     def allow_symlink(self):
-        print_log(
+        kdlogger.print_log(
             'allow_symlink will be deprecated in future',
             logger='current',
-            level=logging.WARNING)
+            level=kdlogger.WARNING)
         return self._allow_symlink
 
     @property

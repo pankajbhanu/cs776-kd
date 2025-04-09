@@ -8,7 +8,7 @@ import torch
 from torch.utils.data import DataLoader
 
 from ..evaluator import Evaluator
-from ..logging import HistoryBuffer, print_log
+from ..kdlogger import HistoryBuffer, print_log
 from ..registry import LOOPS
 from ..structures import BaseDataElement
 from ..utils import is_list_of

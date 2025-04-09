@@ -143,7 +143,7 @@ def is_seq_of(seq: Any,
         bool: Return True if ``seq`` is valid else False.
 
     Examples:
-        >>> from mmengine.utils import is_seq_of
+        >>> from ..engine.utils import is_seq_of
         >>> seq = ['a', 'b', 'c']
         >>> is_seq_of(seq, str)
         True
@@ -225,7 +225,7 @@ def apply_to(data: Any, expr: Callable, apply_func: Callable):
     `np.ndarray` to `Tensor`. You can use the following code:
 
     Examples:
-        >>> from mmengine.utils import apply_to
+        >>> from ..engine.utils import apply_to
         >>> import numpy as np
         >>> import torch
         >>> data = dict(array=[np.array(1)]) # {'array': [array(1)]}
@@ -448,7 +448,7 @@ def deprecated_function(since: str, removed_in: str,
     Returns:
         Callable: A new function, which will be deprecated soon.
     """  # noqa: E501
-    from mmengine import print_log
+    from ..engine import print_log
 
     def decorator(function):
 

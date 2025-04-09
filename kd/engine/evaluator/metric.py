@@ -8,7 +8,7 @@ from torch import Tensor
 from ..dist import (broadcast_object_list, collect_results,
                            is_main_process)
 from ..fileio import dump
-from ..logging import print_log
+from ..kdlogger import print_log
 from ..registry import METRICS
 from ..structures import BaseDataElement
 

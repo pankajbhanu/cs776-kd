@@ -7,7 +7,7 @@ import torch
 
 from ..device import (get_device, is_cuda_available, is_mlu_available,
                              is_npu_available)
-from ..logging import print_log
+from ..kdlogger import print_log
 from ..utils import digit_version
 from ..utils.dl_utils import TORCH_VERSION
 

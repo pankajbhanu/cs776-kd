@@ -4,12 +4,11 @@ from typing import Callable, Dict, List, Optional, Union
 
 import torch.nn as nn
 
-import mmengine
-from mmengine.device import get_device
-from mmengine.model import revert_sync_batchnorm
-from mmengine.optim import BaseOptimWrapper, _ParamScheduler
-from mmengine.registry import STRATEGIES
-from mmengine.utils import get_git_hash
+from ..device import get_device
+from ..model import revert_sync_batchnorm
+from ..optim import BaseOptimWrapper, _ParamScheduler
+from ..registry import STRATEGIES
+from ..utils import get_git_hash
 from .base import BaseStrategy
 
 
@@ -275,7 +274,6 @@ class SingleDeviceStrategy(BaseStrategy):
         extra_ckpt['meta'].update(
             seed=self.seed,
             time=time.strftime('%Y%m%d_%H%M%S', time.localtime()),
-            mmengine=mmengine.__version__ + get_git_hash(),
         )
 
         state_dict.update(extra_ckpt)

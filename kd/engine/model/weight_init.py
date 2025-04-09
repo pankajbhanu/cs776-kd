@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 from torch import Tensor
 
-from ..logging import print_log
+from ..kdlogger import print_log
 from ..registry import WEIGHT_INITIALIZERS, build_from_cfg
 
 

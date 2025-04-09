@@ -484,7 +484,7 @@ class PretrainedInit:
 
     def __call__(self, module):
         from detectron2.checkpoint import DetectionCheckpointer
-        # from mmengine.runner.checkpoint import (_load_checkpoint_with_prefix,
+        # from ..engine.runner.checkpoint import (_load_checkpoint_with_prefix,
         #                                         load_checkpoint,
         #                                         load_state_dict)
         if self.prefix is None:

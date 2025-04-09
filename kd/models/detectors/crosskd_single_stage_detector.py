@@ -5,8 +5,8 @@ from typing import Any, List, Optional, Union
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from mmengine.config import Config
-from mmengine.runner import load_checkpoint
+from ..engine.config import Config
+from ..engine.runner import load_checkpoint
 from torch import Tensor
 
 from mmdet.registry import MODELS

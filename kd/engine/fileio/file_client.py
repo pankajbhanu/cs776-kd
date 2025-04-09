@@ -5,7 +5,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Generator, Iterator, Optional, Tuple, Union
 
-from ..logging import print_log
+from ..kdlogger import print_log
 from ..utils import is_filepath
 from .backends import (BaseStorageBackend, HTTPBackend, LmdbBackend,
                        LocalBackend, MemcachedBackend, PetrelBackend)

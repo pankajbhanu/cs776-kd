@@ -6,16 +6,15 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from ...registry import MODELS
+from ... import registry
 from ...structures import BaseDataElement
-from ..utils import is_seq_of
-from ..utils import stack_batch
+from .. import utils
 
 CastData = Union[tuple, dict, BaseDataElement, torch.Tensor, list, bytes, str,
                  None]
 
 
-@MODELS.register_module()
+@registry.MODELS.register_module()
 class BaseDataPreprocessor(nn.Module):
     """Base data pre-processor used for copying data to the target device.
 
@@ -150,7 +149,7 @@ class BaseDataPreprocessor(nn.Module):
         return super().cpu()
 
 
-@MODELS.register_module()
+@registry.MODELS.register_module()
 class ImgDataPreprocessor(BaseDataPreprocessor):
     """Image pre-processor for normalization and bgr to rgb conversion.
 
@@ -255,7 +254,7 @@ class ImgDataPreprocessor(BaseDataPreprocessor):
         data = self.cast_data(data)  # type: ignore
         _batch_inputs = data['inputs']  # type: ignore
         # Process data with `pseudo_collate`.
-        if is_seq_of(_batch_inputs, torch.Tensor):
+        if utils.is_seq_of(_batch_inputs, torch.Tensor):
             batch_inputs = []
             for _batch_input in _batch_inputs:
                 # channel transform
@@ -275,7 +274,7 @@ class ImgDataPreprocessor(BaseDataPreprocessor):
                     _batch_input = (_batch_input - self.mean) / self.std
                 batch_inputs.append(_batch_input)
             # Pad and stack Tensor.
-            batch_inputs = stack_batch(batch_inputs, self.pad_size_divisor,
+            batch_inputs = utils.stack_batch(batch_inputs, self.pad_size_divisor,
                                        self.pad_value)
         # Process data with `default_collate`.
         elif isinstance(_batch_inputs, torch.Tensor):

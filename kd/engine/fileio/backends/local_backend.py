@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Generator, Iterator, Optional, Tuple, Union
 
 from .base import BaseStorageBackend
-from ...utils.path import mkdir_or_exist, symlink
+from ... import utils
 
 
 class LocalBackend(BaseStorageBackend):
@@ -98,7 +98,7 @@ class LocalBackend(BaseStorageBackend):
             >>> filepath = '/path/of/file'
             >>> backend.put_text('hello world', filepath)
         """
-        mkdir_or_exist(osp.dirname(filepath))
+        utils.path.mkdir_or_exist(osp.dirname(filepath))
         with open(filepath, 'w', encoding=encoding) as f:
             f.write(obj)
 

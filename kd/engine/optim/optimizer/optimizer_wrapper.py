@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 from torch.optim import Optimizer
 
-from ...logging import MessageHub, print_log
+from ...kdlogger import MessageHub, print_log
 from ...registry import OPTIM_WRAPPERS
 from ...utils.dl_utils import has_batch_norm
 from .base import BaseOptimWrapper

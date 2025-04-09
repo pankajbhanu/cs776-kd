@@ -9,7 +9,7 @@ from typing import Iterable, List, Optional, Union
 import torch.nn as nn
 
 from ..dist import master_only
-from ..logging import MMLogger, print_log
+from ..kdlogger import MMLogger, print_log
 from .weight_init import PretrainedInit, initialize, update_init_info
 from .wrappers.utils import is_model_wrapper
 

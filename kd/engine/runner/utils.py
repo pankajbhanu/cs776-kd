@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 
 from ..device import is_cuda_available, is_musa_available
 from ..dist import get_rank, sync_random_seed
-from ..logging import print_log
+from ..kdlogger import print_log
 from ..utils import digit_version, is_list_of
 from ..utils.dl_utils import TORCH_VERSION
 

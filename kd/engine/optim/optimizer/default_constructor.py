@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 from torch.nn import GroupNorm, LayerNorm
 
-from ...logging import print_log
+from ...kdlogger import print_log
 from ...registry import (OPTIM_WRAPPER_CONSTRUCTORS, OPTIM_WRAPPERS,
                                OPTIMIZERS)
 from ...utils import is_list_of

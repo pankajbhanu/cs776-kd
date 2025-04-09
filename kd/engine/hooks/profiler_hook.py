@@ -9,7 +9,7 @@ import torch
 
 from ..dist import master_only
 from ..hooks import Hook
-from ..logging import print_log
+from ..kdlogger import print_log
 from ..registry import HOOKS
 
 

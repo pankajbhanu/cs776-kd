@@ -16,7 +16,8 @@ from ..config import Config
 from ..dist import master_only
 from ..registry import VISBACKENDS, VISUALIZERS
 from ..structures import BaseDataElement
-from ..utils import ManagerMixin, is_seq_of
+from ..utils import is_seq_of
+from ..common import ManagerMixin
 from ..visualization.utils import (check_type, check_type_and_length,
                                           color_str2rgb, color_val_matplotlib,
                                           convert_overlay_heatmap,

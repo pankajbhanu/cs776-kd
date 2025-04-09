@@ -8,7 +8,7 @@ import torch.nn as nn
 
 from ...optim import OptimWrapper
 from ...registry import MODELS
-from ..utils import is_list_of
+from .. import utils
 from ..base_module import BaseModule
 from .data_preprocessor import BaseDataPreprocessor
 
@@ -163,7 +163,7 @@ class BaseModel(BaseModule):
         for loss_name, loss_value in losses.items():
             if isinstance(loss_value, torch.Tensor):
                 log_vars.append([loss_name, loss_value.mean()])
-            elif is_list_of(loss_value, torch.Tensor):
+            elif utils.is_list_of(loss_value, torch.Tensor):
                 log_vars.append(
                     [loss_name,
                      sum(_loss.mean() for _loss in loss_value)])

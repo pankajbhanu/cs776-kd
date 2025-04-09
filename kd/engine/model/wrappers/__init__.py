@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-from ..utils.dl_utils import TORCH_VERSION
-from ..utils.version_utils import digit_version
+from ...utils.dl_utils import TORCH_VERSION
+from ...utils.version_utils import digit_version
 from .distributed import MMDistributedDataParallel
 from .seperate_distributed import MMSeparateDistributedDataParallel
 from .utils import is_model_wrapper

@@ -1,10 +1,5 @@
 import os
-# from ..engine.runner import Runner
-import ultraimport
-__dir__ = 'tools'
-
-Runner = ultraimport('__dir__/../engine/runner.py')
-# <module 'cherry' from '/home/ronny/Projects/py/ultraimport/examples/quickstart/cherry.py'>
+from kd.engine.runner import Runner
 
 def main():
     # Define the training configuration inline.

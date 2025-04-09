@@ -13,7 +13,7 @@ from ..structures import DetDataSample
 class DetDataPreprocessor(ImgDataPreprocessor):
     """Image pre-processor for detection tasks.
 
-    Comparing with the :class:`mmengine.ImgDataPreprocessor`,
+    Comparing with the :class:`..engine.ImgDataPreprocessor`,
 
     1. It supports batch augmentations.
     2. It will additionally append batch_input_shape and pad_shape

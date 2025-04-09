@@ -12,7 +12,7 @@ from torch.utils.data import Dataset
 
 from ..config import Config
 from ..fileio import join_path, list_from_file, load
-from ..logging import print_log
+from ..kdlogger import print_log
 from ..registry import TRANSFORMS
 from ..utils import is_abs
 

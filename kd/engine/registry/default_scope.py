@@ -4,8 +4,7 @@ import time
 from contextlib import contextmanager
 from typing import Generator, Optional
 
-from ..utils.manager import ManagerMixin, _accquire_lock, _release_lock
-
+from ..common import ManagerMixin, _accquire_lock, _release_lock
 
 class DefaultScope(ManagerMixin):
     """Scope of current task used to reset the current registry, which can be

@@ -1,8 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 from typing import Dict, Optional, Sequence, Union
 
-from mmengine import is_method_overridden
-
 DATA_BATCH = Optional[Union[dict, tuple, list]]
 
 
@@ -425,9 +423,9 @@ class Hook:
             list: List of triggered stages.
         """
         trigger_stages = set()
-        for stage in Hook.stages:
-            if is_method_overridden(stage, Hook, self):
-                trigger_stages.add(stage)
+        # for stage in Hook.stages:
+        #     if is_method_overridden(stage, Hook, self):
+        #         trigger_stages.add(stage)
 
         # some methods will be triggered in multi stages
         # use this dict to map method to stages.
@@ -442,8 +440,8 @@ class Hook:
             ['after_train_iter', 'after_val_iter', 'after_test_iter'],
         }
 
-        for method, map_stages in method_stages_map.items():
-            if is_method_overridden(method, Hook, self):
-                trigger_stages.update(map_stages)
+        # for method, map_stages in method_stages_map.items():
+        #     if is_method_overridden(method, Hook, self):
+        #         trigger_stages.update(map_stages)
 
         return list(trigger_stages)

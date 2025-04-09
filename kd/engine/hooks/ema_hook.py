@@ -4,7 +4,7 @@ import itertools
 import logging
 from typing import Dict, Optional
 
-from ..logging import print_log
+from ..kdlogger import print_log
 from ..model import is_model_wrapper
 from ..registry import HOOKS, MODELS
 from .hook import DATA_BATCH, Hook

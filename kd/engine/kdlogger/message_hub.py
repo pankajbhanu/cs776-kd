@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Optional, Union
 
 import numpy as np
 
-from ..utils import ManagerMixin
+from ..common import ManagerMixin
 from .history_buffer import HistoryBuffer
 from .logger import print_log
 
@@ -89,7 +89,7 @@ class MessageHub(ManagerMixin):
             MessageHub: Empty ``MessageHub`` instance.
         """
         if not cls._instance_dict:
-            cls.get_instance('mmengine')
+            cls.get_instance('engine')
         return super().get_current_instance()
 
     def update_scalar(self,

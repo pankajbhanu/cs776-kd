@@ -10,7 +10,7 @@ from typing import Callable, Dict, List, Optional, Sequence, Union
 
 from ..dist import is_main_process, master_only
 from ..fileio import FileClient, get_file_backend
-from ..logging import print_log
+from ..kdlogger import print_log
 from ..registry import HOOKS
 from ..utils import is_list_of, is_seq_of
 from .hook import Hook

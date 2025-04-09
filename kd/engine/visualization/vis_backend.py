@@ -17,7 +17,7 @@ import torch
 from ..config import Config, ConfigDict
 from ..fileio import dump
 from ..hooks.logger_hook import SUFFIX_TYPE
-from ..logging import MMLogger, print_log
+from ..kdlogger import MMLogger, print_log
 from ..registry import VISBACKENDS
 from ..utils import digit_version, scandir
 from ..utils.dl_utils import TORCH_VERSION

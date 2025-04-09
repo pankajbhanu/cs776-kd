@@ -4,9 +4,9 @@ from typing import Any, Dict, Optional, Union
 import numpy as np
 import torch
 
-from ..registry import HOOKS
+from .. import registry
 from ..utils import get_git_hash
-from ..version import __version__
+# from ..version import __version__
 from .hook import Hook
 
 DATA_BATCH = Optional[Union[dict, tuple, list]]
@@ -30,7 +30,7 @@ def _is_scalar(value: Any) -> bool:
     return False
 
 
-@HOOKS.register_module()
+@registry.HOOKS.register_module()
 class RuntimeInfoHook(Hook):
     """A hook that updates runtime information into message hub.
 
@@ -51,7 +51,8 @@ class RuntimeInfoHook(Hook):
             cfg=runner.cfg.pretty_text,
             seed=runner.seed,
             experiment_name=runner.experiment_name,
-            mmengine_version=__version__ + get_git_hash())
+            # mmengine_version=__version__ + get_git_hash()
+            )
         runner.message_hub.update_info_dict(metainfo)
 
         self.last_loop_stage = None

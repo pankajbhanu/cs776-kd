@@ -12,7 +12,7 @@ import torch
 from ..fileio import FileClient, dump
 from ..fileio.io import get_file_backend
 from ..hooks import Hook
-from ..logging import print_log
+from ..kdlogger import print_log
 from ..registry import HOOKS
 from ..utils import is_seq_of, scandir
 

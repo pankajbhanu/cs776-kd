@@ -23,8 +23,8 @@ from rich.console import Console
 from rich.text import Text
 from yapf.yapflib.yapf_api import FormatCode
 
-from ..fileio import dump, load
-from ..logging import print_log
+from .. import fileio
+from ..kdlogger import print_log
 from ..utils import (check_file_exist, digit_version,
                             get_installed_path, import_modules_from_strings,
                             is_installed)
@@ -929,7 +929,7 @@ class Config:
                         if (key not in ori_keys and not key.startswith('__'))
                     }
                 elif filename.endswith(('.yml', '.yaml', '.json')):
-                    cfg_dict = load(temp_config_file.name)
+                    cfg_dict = fileio.load(temp_config_file.name)
                 # close temp file
                 for key, value in list(cfg_dict.items()):
                     if isinstance(value,
@@ -1233,7 +1233,7 @@ class Config:
                     base_files = []
         elif file_format in ('.yml', '.yaml', '.json'):
             import mmengine
-            cfg_dict = ..load(filename)
+            cfg_dict = fileio.load(filename)
             base_files = cfg_dict.get(BASE_KEY, [])
         else:
             raise ConfigParsingError(
@@ -1570,13 +1570,13 @@ class Config:
                 return self.pretty_text
             else:
                 file_format = self.filename.split('.')[-1]
-                return dump(cfg_dict, file_format=file_format)
+                return fileio.dump(cfg_dict, file_format=file_format)
         elif file.endswith('.py'):
             with open(file, 'w', encoding='utf-8') as f:
                 f.write(self.pretty_text)
         else:
             file_format = file.split('.')[-1]
-            return dump(cfg_dict, file=file, file_format=file_format)
+            return fileio.dump(cfg_dict, file=file, file_format=file_format)
 
     def merge_from_dict(self,
                         options: dict,
@@ -1681,7 +1681,7 @@ class Config:
                 if node.level != 0:
                     return True
                 # Skip checking when using `..config` in cfg file
-                if (node.module == 'mmengine' and len(node.names) == 1
+                if (node.module == 'engine' and len(node.names) == 1
                         and node.names[0].name == 'Config'):
                     continue
                 if not isinstance(node.module, str):

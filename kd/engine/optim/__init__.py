@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 from .optimizer import (OPTIM_WRAPPER_CONSTRUCTORS, OPTIMIZERS,
-                        AmpOptimWrapper, ApexOptimWrapper, BaseOptimWrapper,
+                        AmpOptimWrapper, BaseOptimWrapper,
                         DefaultOptimWrapperConstructor, OptimWrapper,
                         OptimWrapperDict, ZeroRedundancyOptimizer,
                         build_optim_wrapper)

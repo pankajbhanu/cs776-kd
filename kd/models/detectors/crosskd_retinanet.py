@@ -7,7 +7,7 @@ from torch import Tensor
 
 from ..structures import SampleList
 from ..structures.bbox import cat_boxes
-from mmdet.utils import InstanceList, OptInstanceList
+from ..utils import InstanceList, OptInstanceList
 
 # from ..utils import images_to_levels, unpack_gt_instances
 from .crosskd_single_stage_detector import CrossKDSingleStageDetector

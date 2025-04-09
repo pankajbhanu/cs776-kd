@@ -4,3 +4,6 @@ understanding_detectron2
 *.zip*
 *.jpg
 detectron2/dataset
+**__pycache__
+work_dirs
+cs776kd.egg-info

@@ -5,10 +5,10 @@ from typing import Callable, Optional
 import torch.nn as nn
 from torch.nn.parallel import DistributedDataParallel
 
-from mmengine.device import get_device
-from mmengine.dist import init_dist, is_distributed, master_only
-from mmengine.model import convert_sync_batchnorm, is_model_wrapper
-from mmengine.registry import MODEL_WRAPPERS, STRATEGIES
+from ..device import get_device
+from ..dist import init_dist, is_distributed, master_only
+from ..model import convert_sync_batchnorm, is_model_wrapper
+from ..registry import MODEL_WRAPPERS, STRATEGIES
 from .single_device import SingleDeviceStrategy
 
 

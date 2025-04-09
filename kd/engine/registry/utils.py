@@ -5,7 +5,7 @@ import os.path as osp
 from typing import Optional
 
 from ..fileio import dump
-from ..logging import print_log
+from ..kdlogger import print_log
 from . import root
 from .default_scope import DefaultScope
 from .registry import Registry

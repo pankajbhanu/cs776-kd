@@ -14,13 +14,13 @@ class BaseDataElement:
     on a task, such as predicted bboxes, instance masks, semantic
     segmentation masks, etc. Because groundtruth labels and predicted results
     often have similar properties (for example, the predicted bboxes and the
-    groundtruth bboxes), MMEngine uses the same abstract data interface to
+    groundtruth bboxes), ..engine uses the same abstract data interface to
     encapsulate predicted results and groundtruth labels, and it is recommended
     to use different name conventions to distinguish them, such as using
     ``gt_instances`` and ``pred_instances`` to distinguish between labels and
     predicted results. Additionally, we distinguish data elements at instance
     level, pixel level, and label level. Each of these types has its own
-    characteristics. Therefore, MMEngine defines the base class
+    characteristics. Therefore, ..engine defines the base class
     ``BaseDataElement``, and implement ``InstanceData``, ``PixelData``, and
     ``LabelData`` inheriting from ``BaseDataElement`` to represent different
     types of ground truth labels or predictions.
@@ -72,7 +72,7 @@ class BaseDataElement:
 
     Examples:
         >>> import torch
-        >>> from mmengine.structures import BaseDataElement
+        >>> from ..engine.structures import BaseDataElement
         >>> gt_instances = BaseDataElement()
         >>> bboxes = torch.rand((5, 4))
         >>> scores = torch.rand((5,))

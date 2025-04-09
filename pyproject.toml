@@ -1,8 +1,15 @@
 [project]
-name = "cs776project"
-version = "2025.03.28"
+name = "cs776kd"
+version = "0.1.0"
+readme = "README.md"
 requires-python = ">=3.12"
 dynamic = ["dependencies"]
 
+[tool.setuptools]
+packages = ["kd"]
 [tool.setuptools.dynamic]
 dependencies = { file = ["requirements.txt"] }
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"

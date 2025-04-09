@@ -59,7 +59,7 @@ class InstanceData(BaseDataElement):
         ...         return new_data
         ...     def __repr__(self):
         ...         return str(self.tmp)
-        >>> from mmengine.structures import InstanceData
+        >>> from ..engine.structures import InstanceData
         >>> import numpy as np
         >>> import torch
         >>> img_meta = dict(img_shape=(800, 1196, 3), pad_shape=(800, 1216, 3))

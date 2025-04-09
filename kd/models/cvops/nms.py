@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import torch
-from mmengine.utils import deprecated_api_warning
+from ..engine.utils import deprecated_api_warning
 from torch import Tensor
 
 from ..utils import ext_loader

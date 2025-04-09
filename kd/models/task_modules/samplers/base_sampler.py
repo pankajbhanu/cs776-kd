@@ -70,7 +70,7 @@ class BaseSampler(metaclass=ABCMeta):
             :obj:`SamplingResult`: Sampling result.
 
         Example:
-            >>> from mmengine.structures import InstanceData
+            >>> from ..engine.structures import InstanceData
             >>> from mmdet.models.task_modules.samplers import RandomSampler,
             >>> from mmdet.models.task_modules.assigners import AssignResult
             >>> from mmdet.models.task_modules.samplers.

@@ -17,7 +17,7 @@ from ..dist import get_rank, infer_launcher, master_only
 from ..evaluator import Evaluator
 from ..fileio import FileClient, join_path
 from ..hooks import Hook
-from ..logging import MessageHub, print_log
+from ..kdlogger import MessageHub, print_log
 from ..optim import OptimWrapper, OptimWrapperDict, _ParamScheduler
 from ..registry import (DATA_SAMPLERS, DATASETS, EVALUATOR, FUNCTIONS,
                                HOOKS, LOG_PROCESSORS, LOOPS, RUNNERS,

@@ -11,17 +11,18 @@ import torch
 import torch.nn as nn
 from torch.optim import Optimizer
 
-import mmengine
-from mmengine.config import Config, ConfigDict
-from mmengine.dist import (broadcast, get_dist_info, infer_launcher,
-                           is_distributed)
-from mmengine.logging import MMLogger
-from mmengine.model.wrappers import is_model_wrapper
-from mmengine.optim import (BaseOptimWrapper, OptimWrapperDict,
-                            _ParamScheduler, build_optim_wrapper)
-from mmengine.registry import MODELS, OPTIM_WRAPPERS, PARAM_SCHEDULERS
-from mmengine.utils import digit_version
-from mmengine.utils.dl_utils import (TORCH_VERSION, collect_env,
+from .. import config
+from ..dist import (broadcast, get_dist_info, infer_launcher,
+                   is_distributed)
+from ..kdlogger import MMLogger
+from ..model.wrappers import is_model_wrapper
+from ..optim import (BaseOptimWrapper, OptimWrapperDict,
+                    _ParamScheduler, build_optim_wrapper)
+from ..registry import MODELS, OPTIM_WRAPPERS, PARAM_SCHEDULERS
+from ..utils import digit_version
+from .. import utils
+from .. import runner
+from ..utils.dl_utils import (TORCH_VERSION, collect_env,
                                      set_multi_processing)
 
 ParamSchedulerType = Union[List[_ParamScheduler], Dict[str,
@@ -72,7 +73,7 @@ class BaseStrategy(metaclass=ABCMeta):
         auto_scale_lr: Optional[dict] = None,
     ):
         self._work_dir = osp.abspath(work_dir)
-        mmengine.mkdir_or_exist(self._work_dir)
+        utils.mkdir_or_exist(self._work_dir)
 
         self._env_kwargs = env_kwargs or {}
         self._setup_env(**self._env_kwargs)
@@ -83,7 +84,7 @@ class BaseStrategy(metaclass=ABCMeta):
             self._experiment_name = self.timestamp
 
         self._log_dir = osp.join(self.work_dir, self.timestamp)
-        mmengine.mkdir_or_exist(self._log_dir)
+        utils.mkdir_or_exist(self._log_dir)
 
         log_kwargs = log_kwargs or {}
         self.logger = self.build_logger(**log_kwargs)
@@ -269,7 +270,7 @@ class BaseStrategy(metaclass=ABCMeta):
                 See https://pytorch.org/docs/stable/notes/randomness.html for
                 more details.
         """
-        from mmengine.runner import set_random_seed
+        from runner.runner import set_random_seed
         self._seed = set_random_seed(
             seed=seed,
             deterministic=deterministic,
@@ -467,7 +468,7 @@ class BaseStrategy(metaclass=ABCMeta):
         """  # noqa: E501
         if isinstance(optim_wrapper, BaseOptimWrapper):
             return optim_wrapper
-        if isinstance(optim_wrapper, (dict, ConfigDict, Config)):
+        if isinstance(optim_wrapper, (dict, config.ConfigDict, config.Config)):
             # optimizer must be defined for single optimizer training.
             optimizer = optim_wrapper.get('optimizer', None)
 
@@ -758,7 +759,7 @@ class BaseStrategy(metaclass=ABCMeta):
 
     def model_state_dict(self) -> dict:
         """Get model state dict."""
-        from mmengine.runner import weights_to_cpu
+        from runner.runner import weights_to_cpu
         return weights_to_cpu(self.model.state_dict())
 
     def optim_state_dict(self) -> dict:
@@ -792,7 +793,7 @@ class BaseStrategy(metaclass=ABCMeta):
         revise_keys: list = [(r'^module.', '')],
     ) -> None:
         """Load model state from dict."""
-        from mmengine.runner.checkpoint import _load_checkpoint_to_model
+        from runner.runner.checkpoint import _load_checkpoint_to_model
 
         if is_model_wrapper(self.model):
             model = self.model.module
@@ -837,7 +838,7 @@ class BaseStrategy(metaclass=ABCMeta):
                 If not found, resuming does nothing. If ``resume`` is a string,
                 it will be treated as the checkpoint file to resume from.
         """
-        from mmengine.runner import find_latest_checkpoint
+        from runner.runner import find_latest_checkpoint
 
         if not resume and load_from is None:
             return None

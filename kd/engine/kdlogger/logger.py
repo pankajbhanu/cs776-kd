@@ -12,8 +12,8 @@ from typing import Dict, Optional, Union
 
 from termcolor import colored
 
-from ..utils import ManagerMixin
-from ..utils.manager import _accquire_lock, _release_lock
+from ..common import ManagerMixin
+from ..common.manager import _accquire_lock, _release_lock
 
 
 class FilterDuplicateWarning(logging.Filter):
@@ -194,7 +194,7 @@ class MMLogger(Logger, ManagerMixin):
 
     def __init__(self,
                  name: str,
-                 logger_name='mmengine',
+                 logger_name='engine',
                  log_file: Optional[str] = None,
                  log_level: Union[int, str] = 'INFO',
                  file_mode: str = 'w',

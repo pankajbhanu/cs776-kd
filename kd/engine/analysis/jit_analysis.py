@@ -19,7 +19,7 @@ import torch.nn as nn
 from torch import Tensor
 from torch.jit import TracerWarning, _get_trace_graph
 
-from ..logging import print_log
+from ..kdlogger import print_log
 from .jit_handles import Handle
 
 T = TypeVar('T', bound='JitModelAnalysis')

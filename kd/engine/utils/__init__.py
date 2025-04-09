@@ -1,5 +1,4 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-from .manager import ManagerMeta, ManagerMixin
 from .misc import (apply_to, check_prerequisites, concat_list,
                    deprecated_api_warning, deprecated_function,
                    get_object_from_string, has_method,
@@ -17,6 +16,7 @@ from .progressbar import (ProgressBar, track_iter_progress,
 from .progressbar_rich import track_progress_rich
 from .timer import Timer, TimerError, check_time
 from .version_utils import digit_version, get_git_hash
+from . import dl_utils
 
 __all__ = [
     'is_str', 'iter_cast', 'list_cast', 'tuple_cast', 'is_seq_of',
@@ -27,8 +27,8 @@ __all__ = [
     'to_1tuple', 'to_2tuple', 'to_3tuple', 'to_4tuple', 'to_ntuple',
     'is_installed', 'call_command', 'get_installed_path', 'install_package',
     'is_abs', 'is_method_overridden', 'has_method', 'digit_version',
-    'get_git_hash', 'ManagerMeta', 'ManagerMixin', 'Timer', 'check_time',
+    'get_git_hash', 'Timer', 'check_time',
     'TimerError', 'ProgressBar', 'track_iter_progress',
     'track_parallel_progress', 'track_progress', 'deprecated_function',
-    'apply_to', 'track_progress_rich', 'get_object_from_string'
+    'apply_to', 'track_progress_rich', 'get_object_from_string', 'dl_utils',
 ]

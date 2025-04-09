@@ -25,7 +25,7 @@ from ..dist import (broadcast, get_dist_info, get_rank, get_world_size,
 from ..evaluator import Evaluator
 from ..fileio import FileClient, join_path
 from ..hooks import Hook
-from ..logging import MessageHub, MMLogger, print_log
+from ..kdlogger import MessageHub, MMLogger, print_log
 from ..model import (MMDistributedDataParallel, convert_sync_batchnorm,
                             is_model_wrapper, revert_sync_batchnorm)
 from ..model.efficient_conv_bn_eval import \
@@ -36,7 +36,7 @@ from ..registry import (DATA_SAMPLERS, DATASETS, EVALUATOR, FUNCTIONS,
                                HOOKS, LOG_PROCESSORS, LOOPS, MODEL_WRAPPERS,
                                MODELS, OPTIM_WRAPPERS, PARAM_SCHEDULERS,
                                RUNNERS, VISUALIZERS, DefaultScope)
-from .utils import apply_to, digit_version, get_git_hash, is_seq_of
+from ..utils import apply_to, digit_version, mkdir_or_exist, is_seq_of
 from ..utils.dl_utils import (TORCH_VERSION, collect_env,
                                      set_multi_processing)
 from ..visualization import Visualizer
@@ -283,13 +283,13 @@ class Runner:
         log_processor: Optional[Dict] = None,
         log_level: str = 'INFO',
         visualizer: Optional[Union[Visualizer, Dict]] = None,
-        default_scope: str = 'mmengine',
+        default_scope: str = 'engine',
         randomness: Dict = dict(seed=None),
         experiment_name: Optional[str] = None,
         cfg: Optional[ConfigType] = None,
     ):
         self._work_dir = osp.abspath(work_dir)
-        # ..mkdir_or_exist(self._work_dir)
+        mkdir_or_exist(self._work_dir)
 
         # recursively copy the `cfg` because `self.cfg` will be modified
         # everywhere.
@@ -382,7 +382,7 @@ class Runner:
         else:
             self._experiment_name = self.timestamp
         self._log_dir = osp.join(self.work_dir, self.timestamp)
-        # ..mkdir_or_exist(self._log_dir)
+        mkdir_or_exist(self._log_dir)
         # Used to reset registries location. See :meth:`Registry.build` for
         # more details.
         if default_scope is not None:

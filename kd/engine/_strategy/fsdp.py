@@ -18,17 +18,16 @@ from torch.distributed.fsdp.fully_sharded_data_parallel import (
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import LRScheduler
 
-import mmengine
-from mmengine.config import Config, ConfigDict
-from mmengine.device import get_device
-from mmengine.dist import get_rank, is_main_process
-from mmengine.model import BaseDataPreprocessor, is_model_wrapper
-from mmengine.optim import (AmpOptimWrapper, BaseOptimWrapper, OptimWrapper,
+from .. import config
+from ..device import get_device
+from ..dist import get_rank, is_main_process
+from ..model import BaseDataPreprocessor, is_model_wrapper
+from ..optim import (AmpOptimWrapper, BaseOptimWrapper, OptimWrapper,
                             OptimWrapperDict, _ParamScheduler,
                             build_optim_wrapper)
-from mmengine.registry import (FUNCTIONS, MODEL_WRAPPERS, OPTIM_WRAPPERS,
+from ..registry import (FUNCTIONS, MODEL_WRAPPERS, OPTIM_WRAPPERS,
                                PARAM_SCHEDULERS, STRATEGIES, Registry)
-from mmengine.utils import get_git_hash, mkdir_or_exist
+from ..utils import get_git_hash, mkdir_or_exist
 from .distributed import DDPStrategy
 from .utils import MetaTensorContext
 
@@ -259,7 +258,7 @@ class FSDPStrategy(DDPStrategy):
                 checkpoint before saving the checkpoint.
                 Defaults to None.
         """
-        from mmengine.runner.checkpoint import save_checkpoint
+        from ..runner.checkpoint import save_checkpoint
 
         state_dict: dict = dict()
         state_dict['state_dict'] = self.model_state_dict()
@@ -281,7 +280,6 @@ class FSDPStrategy(DDPStrategy):
         extra_ckpt['meta'].update(
             seed=self.seed,
             time=time.strftime('%Y%m%d_%H%M%S', time.localtime()),
-            mmengine=mmengine.__version__ + get_git_hash(),
         )
         state_dict.update(extra_ckpt)
 
@@ -543,7 +541,7 @@ class FSDPStrategy(DDPStrategy):
                 new_optimizer.load_state_dict(optim_state_dict)
             optim_wrapper.optimizer = new_optimizer
             return optim_wrapper
-        if isinstance(optim_wrapper, (dict, ConfigDict, Config)):
+        if isinstance(optim_wrapper, (dict, config.ConfigDict, config.Config)):
             assert model is not None
             # optimizer must be defined for single optimizer training.
             optimizer = optim_wrapper.get('optimizer', None)

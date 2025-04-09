@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from ..logging import print_log
+from ..kdlogger import print_log
 from ..utils.dl_utils import mmcv_full_available
 
 

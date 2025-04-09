@@ -4,7 +4,8 @@ import logging
 from typing import TYPE_CHECKING, Any, Optional, Union
 
 from ..config import Config, ConfigDict
-from ..utils import ManagerMixin, digit_version
+from ..common import ManagerMixin 
+from ..utils import digit_version
 from .registry import Registry
 
 if TYPE_CHECKING:
@@ -61,7 +62,7 @@ def build_from_cfg(
         object: The constructed object.
     """
     # Avoid circular import
-    from ..logging import print_log
+    from ..kdlogger import print_log
 
     if not isinstance(cfg, (dict, ConfigDict, Config)):
         raise TypeError(
@@ -161,7 +162,7 @@ def build_runner_from_cfg(cfg: Union[dict, ConfigDict, Config],
         object: The constructed runner object.
     """
     from ..config import Config, ConfigDict
-    from ..logging import print_log
+    from ..kdlogger import print_log
 
     assert isinstance(
         cfg,
@@ -238,7 +239,7 @@ def build_optimizer_from_cfg(
         default_args: Optional[Union[dict, ConfigDict, Config]] = None) -> Any:
     import torch
 
-    from ..logging import print_log
+    from ..kdlogger import print_log
     if 'type' in cfg \
             and 'Adafactor' == cfg['type'] \
             and digit_version(torch.__version__) >= digit_version('2.5.0'):

@@ -153,7 +153,7 @@ class Registry:
             >>>     pass
             >>> # The scope of ``ResNet`` will be ``mmdet``.
         """
-        from ..logging import print_log
+        from ..kdlogger import print_log
 
         # `sys._getframe` returns the frame object that many calls below the
         # top of the stack. The call stack for `infer_scope` can be listed as
@@ -169,7 +169,7 @@ class Registry:
         else:
             # use "mmengine" to handle some cases which can not infer the scope
             # like initializing Registry in interactive mode
-            scope = 'mmengine'
+            scope = 'engine'
             print_log(
                 'set scope as "mmengine" when scope can not be inferred. You '
                 'can silence this warning by passing a "scope" argument to '
@@ -272,7 +272,7 @@ class Registry:
             >>> DefaultScope.get_current_instance().scope_name
             custom
         """  # noqa: E501
-        from ..logging import print_log
+        from ..kdlogger import print_log
 
         # Switch to the given scope temporarily. If the corresponding registry
         # can be found in root registry, return the registry under the scope,
@@ -335,7 +335,7 @@ class Registry:
         """Import modules from the pre-defined locations in self._location."""
         if not self._imported:
             # Avoid circular import
-            from ..logging import print_log
+            from ..kdlogger import print_log
 
             # avoid BC breaking
             if len(self._locations) == 0 and self.scope in MODULE2PACKAGE:
@@ -435,7 +435,7 @@ class Registry:
             >>> mobilenet_cls = DETECTORS.get('cls.MobileNet')
         """
         # Avoid circular import
-        from ..logging import print_log
+        from ..kdlogger import print_log
 
         if not isinstance(key, str):
             raise TypeError(

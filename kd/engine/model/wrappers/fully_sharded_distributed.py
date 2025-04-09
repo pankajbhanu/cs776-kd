@@ -23,7 +23,7 @@ from torch.distributed.fsdp.fully_sharded_data_parallel import (
 from ...optim import OptimWrapper
 from ...registry import FUNCTIONS, MODEL_WRAPPERS
 from ...structures import BaseDataElement
-from ..utils import digit_version, is_seq_of
+from .. import utils
 
 
 @MODEL_WRAPPERS.register_module()
@@ -328,11 +328,11 @@ class MMFullyShardedDataParallel(FullyShardedDataParallel):
                                                       Iterable[nn.Module]]):
         """Get params from string."""
         params_dict = dict(module.named_parameters())
-        if is_seq_of(ignored_parameters, str):
+        if utils.is_seq_of(ignored_parameters, str):
             ignored_parameters = [
                 params_dict[name] for name in ignored_parameters
             ]
-        if not is_seq_of(ignored_parameters,
+        if not utils.is_seq_of(ignored_parameters,
                          nn.Parameter) and ignored_parameters is not None:
             raise TypeError(
                 '`ignored_modules` should be `None`, `Iterable[str]` or '
@@ -345,9 +345,9 @@ class MMFullyShardedDataParallel(FullyShardedDataParallel):
                                                     Iterable[nn.Module]]):
         """Get modules from string."""
         modules_dict = dict(module.named_modules())
-        if is_seq_of(ignored_modules, str):
+        if utils.is_seq_of(ignored_modules, str):
             ignored_modules = [modules_dict[name] for name in ignored_modules]
-        if not is_seq_of(ignored_modules,
+        if not utils.is_seq_of(ignored_modules,
                          nn.Module) and ignored_modules is not None:
             raise TypeError(
                 '`ignored_modules` should be `None`, `Iterable[str]` or '
@@ -355,100 +355,100 @@ class MMFullyShardedDataParallel(FullyShardedDataParallel):
                 f'{type(ignored_modules)}')
         return ignored_modules
 
-    if digit_version(torch.__version__) < digit_version('2.0.1'):
+    # if utils.digit_version(torch.__version__) < utils.digit_version('2.0.1'):
 
-        @staticmethod
-        def optim_state_dict(
-            model: torch.nn.Module,
-            optim: torch.optim.Optimizer,
-            group: Optional[dist.ProcessGroup] = None,
-        ) -> Dict[str, Any]:
-            """Copied from pytorch 2.0.1 which has fixed some bugs."""
-            state_dict_settings = FullyShardedDataParallel.get_state_dict_type(
-                model)
-            return FullyShardedDataParallel._optim_state_dict_impl(
-                model=model,
-                optim=optim,
-                optim_state_dict=optim.state_dict(),
-                optim_input=None,
-                rank0_only=getattr(state_dict_settings.optim_state_dict_config,
-                                   'rank0_only', False),
-                full_state_dict=state_dict_settings.state_dict_type ==
-                StateDictType.FULL_STATE_DICT,
-                group=group,
-            )
+    #     @staticmethod
+    #     def optim_state_dict(
+    #         model: torch.nn.Module,
+    #         optim: torch.optim.Optimizer,
+    #         group: Optional[dist.ProcessGroup] = None,
+    #     ) -> Dict[str, Any]:
+    #         """Copied from pytorch 2.0.1 which has fixed some bugs."""
+    #         state_dict_settings = FullyShardedDataParallel.get_state_dict_type(
+    #             model)
+    #         return FullyShardedDataParallel._optim_state_dict_impl(
+    #             model=model,
+    #             optim=optim,
+    #             optim_state_dict=optim.state_dict(),
+    #             optim_input=None,
+    #             rank0_only=getattr(state_dict_settings.optim_state_dict_config,
+    #                                'rank0_only', False),
+    #             full_state_dict=state_dict_settings.state_dict_type ==
+    #             StateDictType.FULL_STATE_DICT,
+    #             group=group,
+    #         )
 
-        @staticmethod
-        def set_state_dict_type(
-            module: nn.Module,
-            state_dict_type: StateDictType,
-            state_dict_config: Optional[StateDictConfig] = None,
-            optim_state_dict_config: Optional[OptimStateDictConfig] = None,
-        ) -> StateDictSettings:
-            """Copied from pytorch 2.0.1 which has fixed some bugs."""
-            import torch.distributed.fsdp._traversal_utils as traversal_utils
-            _state_dict_type_to_config = {
-                StateDictType.FULL_STATE_DICT: FullStateDictConfig,
-                StateDictType.LOCAL_STATE_DICT: LocalStateDictConfig,
-                StateDictType.SHARDED_STATE_DICT: ShardedStateDictConfig,
-            }
-            _optim_state_dict_type_to_config = {
-                StateDictType.FULL_STATE_DICT: FullOptimStateDictConfig,
-                StateDictType.LOCAL_STATE_DICT: LocalOptimStateDictConfig,
-                StateDictType.SHARDED_STATE_DICT: ShardedOptimStateDictConfig,
-            }
+    #     @staticmethod
+    #     def set_state_dict_type(
+    #         module: nn.Module,
+    #         state_dict_type: StateDictType,
+    #         state_dict_config: Optional[StateDictConfig] = None,
+    #         optim_state_dict_config: Optional[OptimStateDictConfig] = None,
+    #     ) -> StateDictSettings:
+    #         """Copied from pytorch 2.0.1 which has fixed some bugs."""
+    #         import torch.distributed.fsdp._traversal_utils as traversal_utils
+    #         _state_dict_type_to_config = {
+    #             StateDictType.FULL_STATE_DICT: FullStateDictConfig,
+    #             StateDictType.LOCAL_STATE_DICT: LocalStateDictConfig,
+    #             StateDictType.SHARDED_STATE_DICT: ShardedStateDictConfig,
+    #         }
+    #         _optim_state_dict_type_to_config = {
+    #             StateDictType.FULL_STATE_DICT: FullOptimStateDictConfig,
+    #             StateDictType.LOCAL_STATE_DICT: LocalOptimStateDictConfig,
+    #             StateDictType.SHARDED_STATE_DICT: ShardedOptimStateDictConfig,
+    #         }
 
-            # Use the default config if a state_dict config is not set.
-            state_dict_config_type = _state_dict_type_to_config[
-                state_dict_type]
-            optim_state_dict_config_type = _optim_state_dict_type_to_config[
-                state_dict_type]
-            if state_dict_config is None:
-                state_dict_config = state_dict_config_type()
-            if optim_state_dict_config is None:
-                optim_state_dict_config = optim_state_dict_config_type()
-            if state_dict_config_type != type(state_dict_config):
-                raise RuntimeError('Expected state_dict_config of type '
-                                   f'{state_dict_config_type} '
-                                   f'but got {type(state_dict_config)}')
-            if optim_state_dict_config_type != type(optim_state_dict_config):
-                raise RuntimeError('Expected optim_state_dict_config of type '
-                                   f'{optim_state_dict_config_type} '
-                                   f'but got {type(optim_state_dict_config)}')
+    #         # Use the default config if a state_dict config is not set.
+    #         state_dict_config_type = _state_dict_type_to_config[
+    #             state_dict_type]
+    #         optim_state_dict_config_type = _optim_state_dict_type_to_config[
+    #             state_dict_type]
+    #         if state_dict_config is None:
+    #             state_dict_config = state_dict_config_type()
+    #         if optim_state_dict_config is None:
+    #             optim_state_dict_config = optim_state_dict_config_type()
+    #         if state_dict_config_type != type(state_dict_config):
+    #             raise RuntimeError('Expected state_dict_config of type '
+    #                                f'{state_dict_config_type} '
+    #                                f'but got {type(state_dict_config)}')
+    #         if optim_state_dict_config_type != type(optim_state_dict_config):
+    #             raise RuntimeError('Expected optim_state_dict_config of type '
+    #                                f'{optim_state_dict_config_type} '
+    #                                f'but got {type(optim_state_dict_config)}')
 
-            # Set the state_dict type and configurations.
-            prev_state_dict_type = None
-            prev_state_dict_config = None
-            prev_optim_state_dict_config = None
-            for submodule in traversal_utils._get_fsdp_states(module):
-                if prev_state_dict_type is None:
-                    prev_state_dict_type = submodule._state_dict_type
-                else:
-                    assert (
-                        prev_state_dict_type == submodule._state_dict_type
-                    ), 'All FSDP modules should have the same state_dict_type.'
-                if prev_state_dict_config is None:
-                    prev_state_dict_config = submodule._state_dict_config
-                else:
-                    assert isinstance(
-                        submodule._state_dict_config,
-                        type(prev_state_dict_config)), (
-                            'All FSDP modules must have the same type of '
-                            'state_dict_config.')
-                if prev_optim_state_dict_config is None:
-                    prev_optim_state_dict_config = \
-                        submodule._optim_state_dict_config
-                else:
-                    assert isinstance(
-                        submodule._optim_state_dict_config,
-                        type(prev_optim_state_dict_config),
-                    ), ('All FSDP modules must have the same type of '
-                        'optim_state_dict_config.')
+    #         # Set the state_dict type and configurations.
+    #         prev_state_dict_type = None
+    #         prev_state_dict_config = None
+    #         prev_optim_state_dict_config = None
+    #         for submodule in traversal_utils._get_fsdp_states(module):
+    #             if prev_state_dict_type is None:
+    #                 prev_state_dict_type = submodule._state_dict_type
+    #             else:
+    #                 assert (
+    #                     prev_state_dict_type == submodule._state_dict_type
+    #                 ), 'All FSDP modules should have the same state_dict_type.'
+    #             if prev_state_dict_config is None:
+    #                 prev_state_dict_config = submodule._state_dict_config
+    #             else:
+    #                 assert isinstance(
+    #                     submodule._state_dict_config,
+    #                     type(prev_state_dict_config)), (
+    #                         'All FSDP modules must have the same type of '
+    #                         'state_dict_config.')
+    #             if prev_optim_state_dict_config is None:
+    #                 prev_optim_state_dict_config = \
+    #                     submodule._optim_state_dict_config
+    #             else:
+    #                 assert isinstance(
+    #                     submodule._optim_state_dict_config,
+    #                     type(prev_optim_state_dict_config),
+    #                 ), ('All FSDP modules must have the same type of '
+    #                     'optim_state_dict_config.')
 
-                submodule._state_dict_type = state_dict_type
-                submodule._state_dict_config = state_dict_config
-                submodule._optim_state_dict_config = optim_state_dict_config
+    #             submodule._state_dict_type = state_dict_type
+    #             submodule._state_dict_config = state_dict_config
+    #             submodule._optim_state_dict_config = optim_state_dict_config
 
-            return StateDictSettings(prev_state_dict_type,
-                                     prev_state_dict_config,
-                                     prev_optim_state_dict_config)
+    #         return StateDictSettings(prev_state_dict_type,
+    #                                  prev_state_dict_config,
+    #                                  prev_optim_state_dict_config)

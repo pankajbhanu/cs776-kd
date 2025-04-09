@@ -12,14 +12,12 @@ from typing import Callable, Dict, Optional
 
 import torch
 
-from ..dist import get_dist_info
-from ..fileio import FileClient, get_file_backend
-from ..fileio import load as load_file
-from ..logging import print_log
-from ..model import BaseTTAModel, is_model_wrapper
-from ..utils import (apply_to, deprecated_function, digit_version,
-                            mkdir_or_exist)
-from ..utils.dl_utils import load_url
+from .. import dist
+from .. import fileio
+from .. import kdlogger
+from .. import model
+from .. import utils
+from .. import hub
 
 # `MMENGINE_HOME` is the highest priority directory to save checkpoints
 # downloaded from Internet. If it is not set, as a workaround, using
@@ -50,7 +48,7 @@ def _get_mmengine_home():
             os.path.join(
                 os.getenv(ENV_XDG_CACHE_HOME, DEFAULT_CACHE_DIR), 'mmengine')))
 
-    mkdir_or_exist(mmengine_home)
+    utils.mkdir_or_exist(mmengine_home)
     return mmengine_home
 
 
@@ -84,7 +82,7 @@ def load_state_dict(module, state_dict, strict=False, logger=None):
     def load(module, local_state_dict, prefix=''):
         # recursively check parallel module in case that the model has a
         # complicated structure, e.g., nn.Module(nn.Module(DDP))
-        if is_model_wrapper(module) or isinstance(module, BaseTTAModel):
+        if model.is_model_wrapper(module) or isinstance(module, model.BaseTTAModel):
             module = module.module
         local_metadata = {} if metadata is None else metadata.get(
             prefix[:-1], {})
@@ -127,7 +125,7 @@ def load_state_dict(module, state_dict, strict=False, logger=None):
         err_msg.append(
             f'missing keys in source state_dict: {", ".join(missing_keys)}\n')
 
-    rank, _ = get_dist_info()
+    rank, _ = dist.get_dist_info()
     if len(err_msg) > 0 and rank == 0:
         err_msg.insert(
             0, 'The model and loaded state dict do not match exactly\n')
@@ -135,12 +133,12 @@ def load_state_dict(module, state_dict, strict=False, logger=None):
         if strict:
             raise RuntimeError(err_msg)
         else:
-            print_log(err_msg, logger=logger, level=logging.WARNING)
+            kdlogger.print_log(err_msg, logger=logger, level=logging.WARNING)
 
 
 def get_torchvision_models():
     import torchvision
-    if digit_version(torchvision.__version__) < digit_version('0.13.0a0'):
+    if utils.digit_version(torchvision.__version__) < utils.digit_version('0.13.0a0'):
         model_urls = dict()
         # When the version of torchvision is lower than 0.13, the model url is
         # not declared in `torchvision.model.__init__.py`, so we need to
@@ -161,9 +159,9 @@ def get_torchvision_models():
         # torchvision version>=0.13.0, new URLs will be added. Users can get
         # the resnet50 checkpoint by setting 'resnet50.imagent1k_v1',
         # 'resnet50' or 'ResNet50_Weights.IMAGENET1K_V1' in the config.
-        json_path = osp.join(..__path__[0], 'hub/torchvision_0.12.json')
-        model_urls = ..load(json_path)
-        if digit_version(torchvision.__version__) < digit_version('0.14.0a0'):
+        json_path = osp.join("", 'hub/torchvision_0.12.json')
+        model_urls = fileio.load(json_path)
+        if utils.digit_version(torchvision.__version__) < utils.digit_version('0.14.0a0'):
             weights_list = [
                 cls for cls_name, cls in torchvision.models.__dict__.items()
                 if cls_name.endswith('_Weights')
@@ -195,25 +193,25 @@ def get_torchvision_models():
     return model_urls
 
 
-# def get_external_models():
-#     mmengine_home = _get_mmengine_home()
-#     default_json_path = osp.join(..__path__[0], 'hub/openmmlab.json')
-#     default_urls = load_file(default_json_path)
-#     assert isinstance(default_urls, dict)
-#     external_json_path = osp.join(mmengine_home, 'open_mmlab.json')
-#     if osp.exists(external_json_path):
-#         external_urls = load_file(external_json_path)
-#         assert isinstance(external_urls, dict)
-#         default_urls.update(external_urls)
+def get_external_models():
+    mmengine_home = _get_mmengine_home()
+    default_json_path = osp.join(hub.__path__[0], 'openmmlab.json')
+    default_urls = fileio.load_file(default_json_path)
+    assert isinstance(default_urls, dict)
+    external_json_path = osp.join(mmengine_home, 'open_mmlab.json')
+    if osp.exists(external_json_path):
+        external_urls = fileio.load_file(external_json_path)
+        assert isinstance(external_urls, dict)
+        default_urls.update(external_urls)
 
-#     return default_urls
+    return default_urls
 
 
-# def get_mmcls_models():
-#     mmcls_json_path = osp.join(..__path__[0], 'hub/mmcls.json')
-#     mmcls_urls = load_file(mmcls_json_path)
+def get_mmcls_models():
+    mmcls_json_path = osp.join(hub.__path__[0], 'mmcls.json')
+    mmcls_urls = fileio.load_file(mmcls_json_path)
 
-#     return mmcls_urls
+    return mmcls_urls
 
 
 # def get_deprecated_model_names():
@@ -322,7 +320,7 @@ class CheckpointLoader:
 
         checkpoint_loader = cls._get_checkpoint_loader(filename)
         class_name = checkpoint_loader.__name__
-        print_log(
+        kdlogger.print_log(
             f'Loads checkpoint by {class_name[10:]} backend from path: '
             f'{filename}',
             logger=logger)
@@ -365,9 +363,9 @@ def load_from_http(filename,
     Returns:
         dict or OrderedDict: The loaded checkpoint.
     """
-    rank, world_size = get_dist_info()
+    rank, world_size = dist.get_dist_info()
     if rank == 0:
-        checkpoint = load_url(
+        checkpoint = utils.dl_utils.load_url(
             filename,
             model_dir=model_dir,
             map_location=map_location,
@@ -375,7 +373,7 @@ def load_from_http(filename,
     if world_size > 1:
         torch.distributed.barrier()
         if rank > 0:
-            checkpoint = load_url(
+            checkpoint = utils.dl_utils.load_url(
                 filename,
                 model_dir=model_dir,
                 map_location=map_location,
@@ -431,7 +429,7 @@ def load_from_ceph(filename, map_location=None, backend='petrel'):
     Returns:
         dict or OrderedDict: The loaded checkpoint.
     """
-    file_backend = get_file_backend(
+    file_backend = fileio.get_file_backend(
         filename, backend_args={'backend': backend})
     with io.BytesIO(file_backend.get(filename)) as buffer:
         checkpoint = torch.load(buffer, map_location=map_location)
@@ -453,7 +451,7 @@ def load_from_torchvision(filename, map_location=None):
     """
     model_urls = get_torchvision_models()
     if filename.startswith('modelzoo://'):
-        print_log(
+        kdlogger.print_log(
             'The URL scheme of "modelzoo://" is deprecated, please '
             'use "torchvision://" instead',
             logger='current',
@@ -487,9 +485,10 @@ def load_from_openmmlab(filename, map_location=None):
         model_name = filename[12:]
         prefix_str = 'openmmlab://'
 
-    deprecated_urls = get_deprecated_model_names()
+    # deprecated_urls = get_deprecated_model_names()
+    deprecated_urls = []
     if model_name in deprecated_urls:
-        print_log(
+        kdlogger.print_log(
             f'{prefix_str}{model_name} is deprecated in favor '
             f'of {prefix_str}{deprecated_urls[model_name]}',
             logger='current',
@@ -653,36 +652,36 @@ def weights_to_cpu(state_dict):
     """
     # stash metadata to put in state_dict later
     metadata = getattr(state_dict, '_metadata', OrderedDict())
-    state_dict = apply_to(state_dict, lambda x: hasattr(x, 'cpu'),
+    state_dict = utils.apply_to(state_dict, lambda x: hasattr(x, 'cpu'),
                           lambda x: x.cpu())
     state_dict._metadata = metadata
     return state_dict
 
 
-@deprecated_function(
-    since='0.3.0',
-    removed_in='0.5.0',
-    instructions='`_save_to_state_dict` will be deprecated in the future, '
-    'please use `nn.Module._save_to_state_dict` directly.')
-def _save_to_state_dict(module, destination, prefix, keep_vars):
-    """Saves module state to `destination` dictionary.
+# @deprecated_function(
+#     since='0.3.0',
+#     removed_in='0.5.0',
+#     instructions='`_save_to_state_dict` will be deprecated in the future, '
+#     'please use `nn.Module._save_to_state_dict` directly.')
+# def _save_to_state_dict(module, destination, prefix, keep_vars):
+#     """Saves module state to `destination` dictionary.
 
-    This method is modified from :meth:`torch.nn.Module._save_to_state_dict`.
+#     This method is modified from :meth:`torch.nn.Module._save_to_state_dict`.
 
-    Args:
-        module (nn.Module): The module to generate state_dict.
-        destination (dict): A dict where state will be stored.
-        prefix (str): The prefix for parameters and buffers used in this
-            module.
-        keep_vars (bool): Whether to keep the variable property of the
-            parameters.
-    """
-    for name, param in module._parameters.items():
-        if param is not None:
-            destination[prefix + name] = param if keep_vars else param.detach()
-    for name, buf in module._buffers.items():
-        if buf is not None and name not in module._non_persistent_buffers_set:
-            destination[prefix + name] = buf if keep_vars else buf.detach()
+#     Args:
+#         module (nn.Module): The module to generate state_dict.
+#         destination (dict): A dict where state will be stored.
+#         prefix (str): The prefix for parameters and buffers used in this
+#             module.
+#         keep_vars (bool): Whether to keep the variable property of the
+#             parameters.
+#     """
+#     for name, param in module._parameters.items():
+#         if param is not None:
+#             destination[prefix + name] = param if keep_vars else param.detach()
+#     for name, buf in module._buffers.items():
+#         if buf is not None and name not in module._non_persistent_buffers_set:
+#             destination[prefix + name] = buf if keep_vars else buf.detach()
 
 
 def get_state_dict(module, destination=None, prefix='', keep_vars=False):
@@ -707,7 +706,7 @@ def get_state_dict(module, destination=None, prefix='', keep_vars=False):
     """
     # recursively check parallel module in case that the model has a
     # complicated structure, e.g., nn.Module(nn.Module(DDP))
-    if is_model_wrapper(module):
+    if model.is_model_wrapper(module):
         module = module.module
 
     # below is the same as torch.nn.Module.state_dict()
@@ -746,7 +745,7 @@ def save_checkpoint(checkpoint,
             New in v0.2.0.
     """
     if file_client_args is not None:
-        print_log(
+        kdlogger.print_log(
             '"file_client_args" will be deprecated in future. '
             'Please use "backend_args" instead',
             logger='current',
@@ -780,9 +779,9 @@ def save_checkpoint(checkpoint,
                 f.flush()
             model.create_file(checkpoint_file, name=model_name)
     else:
-        file_client = FileClient.infer_client(file_client_args, filename)
+        file_client = fileio.FileClient.infer_client(file_client_args, filename)
         if file_client_args is None:
-            file_backend = get_file_backend(
+            file_backend = fileio.get_file_backend(
                 filename, backend_args=backend_args)
         else:
             file_backend = file_client
@@ -809,6 +808,6 @@ def find_latest_checkpoint(path: str) -> Optional[str]:
         with open(save_file) as f:
             last_saved = f.read().strip()
     else:
-        print_log('Did not find last_checkpoint to be resumed.')
+        kdlogger.print_log('Did not find last_checkpoint to be resumed.')
         last_saved = None
     return last_saved
