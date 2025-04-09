@@ -286,7 +286,7 @@ class MMLogger(Logger, ManagerMixin):
             MMLogger: Configured logger instance.
         """
         if not cls._instance_dict:
-            cls.get_instance('mmengine')
+            cls.get_instance('engine')
         return super().get_current_instance()
 
     def callHandlers(self, record: LogRecord) -> None:

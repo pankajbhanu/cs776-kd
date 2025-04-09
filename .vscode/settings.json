@@ -3,5 +3,6 @@
     "python.defaultInterpreterPath": "~/Downloads/cs776/proj/proj776/bin/python",
     "python.analysis.extraPaths": [
         "./detectron2"
-    ]
+    ],
+    "python.analysis.autoImportCompletions": true
 }

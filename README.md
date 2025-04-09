@@ -14,8 +14,6 @@ source myvenv/bin/activate
 
 install pytorch, cuda 
 
-cd detectron2
-
 pip install -e .
 
 mkdir dataset # https://github.com/giddyyupp/coco-minitrain
