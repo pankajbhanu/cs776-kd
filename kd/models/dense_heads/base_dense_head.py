@@ -4,7 +4,6 @@ from abc import ABCMeta, abstractmethod
 from typing import List, Optional, Tuple
 
 import torch
-import torch.nn as nn
 from ..cvops import batched_nms
 from ..structures import InstanceData
 from torch import Tensor
@@ -15,9 +14,9 @@ from ..structures.bbox import (cat_boxes, get_box_tensor, get_box_wh,
 from ..utils import InstanceList, OptMultiConfig
 from ..utils import (filter_scores_and_topk, select_single_mlvl,
                      unpack_gt_instances)
+from ..base_module import BaseModule
 
-
-class BaseDenseHead(nn.Module, metaclass=ABCMeta):
+class BaseDenseHead(BaseModule, metaclass=ABCMeta):
     """Base class for DenseHeads.
 
     1. The ``init_weights`` method is used to initialize densehead's

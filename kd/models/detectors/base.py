@@ -8,6 +8,7 @@ from torch import Tensor, nn
 from ..structures import DetDataSample, OptSampleList, SampleList
 from ..utils import InstanceList, OptConfigType, OptMultiConfig
 from ..utils import samplelist_boxtype2tensor
+from ..data_preprocessors import DetDataPreprocessor
 
 ForwardResults = Union[Dict[str, torch.Tensor], List[DetDataSample],
                        Tuple[torch.Tensor], torch.Tensor]
@@ -25,7 +26,7 @@ class BaseDetector(nn.Module, metaclass=ABCMeta):
     """
 
     def __init__(self,
-                 data_preprocessor: OptConfigType = None,
+                 data_preprocessor: DetDataPreprocessor = None,
                  init_cfg: OptMultiConfig = None):
         super().__init__(
             data_preprocessor=data_preprocessor, init_cfg=init_cfg)

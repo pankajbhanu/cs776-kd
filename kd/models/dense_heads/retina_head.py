@@ -1,5 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch.nn as nn
+
+from kd.models.task_modules.prior_generators.anchor_generator import AnchorGenerator
 from .anchor_head import AnchorHead
 
 
@@ -25,15 +27,10 @@ class RetinaHead(AnchorHead):
     def __init__(self,
                  num_classes,
                  in_channels,
+                 anchor_generator: AnchorGenerator,
                  stacked_convs=4,
                  conv_cfg=None,
                  norm_cfg=None,
-                 anchor_generator=dict(
-                     type='AnchorGenerator',
-                     octave_base_scale=4,
-                     scales_per_octave=3,
-                     ratios=[0.5, 1.0, 2.0],
-                     strides=[8, 16, 32, 64, 128]),
                  init_cfg=dict(
                      type='Normal',
                      layer='Conv2d',

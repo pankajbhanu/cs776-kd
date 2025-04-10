@@ -6,10 +6,11 @@ import torch.utils.checkpoint as cp
 from torch.nn.modules.batchnorm import _BatchNorm
 
 from detectron2.utils.registry import MODELS
+from ..base_module import BaseModule
 from ..layers import ResLayer
 
 
-class BasicBlock(nn.Module):
+class BasicBlock(BaseModule):
     expansion = 1
 
     def __init__(self,
@@ -87,7 +88,7 @@ class BasicBlock(nn.Module):
         return out
 
 
-class Bottleneck(nn.Module):
+class Bottleneck(BaseModule):
     expansion = 4
 
     def __init__(self,
@@ -233,7 +234,7 @@ class Bottleneck(nn.Module):
 
 
 @MODELS.register_module()
-class ResNet(nn.Module):
+class ResNet(BaseModule):
     """ResNet backbone.
 
     Args:
@@ -388,7 +389,7 @@ class ResNet(nn.Module):
                 num_blocks=num_blocks,
                 stride=stride,
                 dilation=dilation,
-                style=self.style,
+                style='pytorch',
                 avg_down=self.avg_down,
                 with_cp=with_cp,
                 plugins=stage_plugins)

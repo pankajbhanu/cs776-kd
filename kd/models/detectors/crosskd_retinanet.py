@@ -22,10 +22,6 @@ class CrossKDRetinaNet(CrossKDSingleStageDetector):
 
     """
     teacher: models -> detectors -> retinanet
-
-
-
-
     self.teacher is an instance of SingleStageDetector. 
         .extract_feature()
     """

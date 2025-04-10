@@ -1,6 +1,7 @@
 from kd.config.common.optim import SGD
 from kd.engine.runner import Runner
 from kd.models.cvops.nms import NMSop
+from kd.models.data_preprocessors.data_preprocessor import DetDataPreprocessor
 from kd.models.detectors import CrossKDRetinaNet
 from kd.models.backbones import ResNet
 from kd.models.necks import FPN
@@ -17,57 +18,112 @@ from kd.models.task_modules.samplers.pseudo_sampler import PseudoSampler
 def main():
     # Define the training configuration inline.
     # This dictionary replicates what you would normally place in a config file.
-    resnet = ResNet(
-        depth=18,
+    teacher_data_preprocessor = DetDataPreprocessor(
+        mean=[123.675, 116.28, 103.53],
+        std=[58.395, 57.12, 57.375],
+        bgr_to_rgb=True,
+        pad_size_divisor=32
+    )
+    teacher_resnet = ResNet(
+        depth=50,
         num_stages=4,
         out_indices=(0, 1, 2, 3),
         frozen_stages=1,
-        norm_cfg=dict(type="BN", requires_grad=True),
-        norm_eval=True,
-        style="pytorch",
-        init_cfg=dict(type="Pretrained", checkpoint="torchvision://resnet18"),
+        pretrained="torchvision://resnet50",
     )
-    neck = FPN(
-        in_channels=[64, 128, 256, 512],
+    teacher_neck = FPN(
+        in_channels=[256, 512, 1024, 2048],
         out_channels=256,
         start_level=1,
-        add_extra_convs="on_output",
-        num_outs=5,
+        add_extra_convs='on_input',
+        num_outs=5
     )
-    anchor_generator = AnchorGenerator(
+    teacher_anchor_generator = AnchorGenerator(
         octave_base_scale=4,
         scales_per_octave=3,
         ratios=[0.5, 1.0, 2.0],
-        strides=[8, 16, 32, 64, 128],
+        strides=[8, 16, 32, 64, 128]
     )
-    bbox_coder = DeltaXYWHBBoxCoder(
-        target_means=[0.0, 0.0, 0.0, 0.0], target_stds=[1.0, 1.0, 1.0, 1.0]
+    teacher_bbox_coder = DeltaXYWHBBoxCoder(
+        target_means=[.0, .0, .0, .0],
+        target_stds=[1.0, 1.0, 1.0, 1.0]
     )
-    loss_cls = FocalLoss(use_sigmoid=True, gamma=2.0, alpha=0.25, loss_weight=1.0)
-    loss_bbox = L1Loss(loss_weight=1.0)
-    bbox_head = RetinaHead(
+    teacher_loss_cls = FocalLoss(
+        use_sigmoid=True,
+        gamma=2.0,
+        alpha=0.25,
+        loss_weight=1.0
+    )
+    teacher_loss_bbox = L1Loss(loss_weight=1.0)
+    teacher_maxiou_assigner = MaxIoUAssigner(
+        pos_iou_thr=0.5,
+        neg_iou_thr=0.4,
+        min_pos_iou=0,
+        ignore_iof_thr=-1
+    )
+    teacher_sampler = PseudoSampler()
+    teacher_nms = NMSop(iou_threshold=0.5)
+    teacher_bbox_head = RetinaHead(
         use_sigmoid=True,
         gamma=2.0,
         alpha=0.25,
         loss_weight=1.0,
-        anchor_generator=anchor_generator,
-        bbox_coder=bbox_coder,
-        loss_cls=loss_cls,
-        loss_bbox=loss_bbox,
+        anchor_generator=teacher_anchor_generator,
+        bbox_coder=teacher_bbox_coder,
+        loss_cls=teacher_loss_cls,
+        loss_bbox=teacher_loss_bbox,
     )
+    student_resnet = ResNet(
+        depth=18,
+        in_channels=3,
+        num_stages=4,
+        out_indices=(0, 1, 2, 3),
+        frozen_stages=1,
+        pretrained="torchvision://resnet18"
+    )
+    student_neck = FPN(
+        in_channels=[64, 128, 256, 512],
+        out_channels=256,
+        num_outs=5,
+        start_level=1,
+        add_extra_convs="on_output",
+    )
+    student_anchor_generator = AnchorGenerator(
+        strides=[8, 16, 32, 64, 128],
+        ratios=[0.5, 1.0, 2.0],
+        octave_base_scale=4,
+        scales_per_octave=3,
+    )
+    student_bbox_coder = DeltaXYWHBBoxCoder(
+        target_means=[0.0, 0.0, 0.0, 0.0],
+        target_stds=[1.0, 1.0, 1.0, 1.0]
+    )
+    student_loss_cls = FocalLoss(use_sigmoid=True, gamma=2.0, alpha=0.25, loss_weight=1.0)
+    student_loss_bbox = L1Loss(loss_weight=1.0)
+    student_bbox_head = RetinaHead(
+        use_sigmoid=True,
+        gamma=2.0,
+        alpha=0.25,
+        loss_weight=1.0,
+        anchor_generator=student_anchor_generator,
+        bbox_coder=student_bbox_coder,
+        loss_cls=student_loss_cls,
+        loss_bbox=student_loss_bbox,
+    )
+    teacher_ckpt = 'https://download.openmmlab.com/mmdetection/v2.0/retinanet/retinanet_r50_fpn_1x_coco/retinanet_r50_fpn_1x_coco_20200130-c2398f9e.pth'
     detector = CrossKDRetinaNet(
-        backbone=resnet,
-        neck=neck,
-        bbox_head=bbox_head,
+        backbone=student_resnet,
+        neck=student_neck,
+        bbox_head=student_bbox_head,
         teacher=teacher,
-        teacher_ckpt="https://download.openmmlab.com/mmdetection/v2.0/retinanet/retinanet_r50_fpn_1x_coco/retinanet_r50_fpn_1x_coco_20200130-c2398f9e.pth",
+        teacher_ckpt=teacher_ckpt
     )
     loss_cls_kd = KDQualityFocalLoss(beta=1, loss_weight=1.0)
     loss_reg_kd = GIoULoss(loss_weight=1.0)
     reused_teacher_head_index = 3
-    assigner = MaxIoUAssigner(use_sigmoid=True, gamma=2.0, alpha=0.25, loss_weight=1.0)
-    sampler = PseudoSampler
-    nms = NMSop(iou_threshold=0.5)
+    student_assigner = MaxIoUAssigner(use_sigmoid=True, gamma=2.0, alpha=0.25, loss_weight=1.0)
+    syudent_sampler = PseudoSampler()
+    student_nms = NMSop(iou_threshold=0.5)
     optim_wrapper = OptimWrapper(
         optimizer=SGD(lr=0.01, momentum=0.9, weight_decay=0.0001)
     )
@@ -183,7 +239,7 @@ def main():
     )
 
     # Build the runner from the configuration dictionary.
-    runner = Runner.from_cfg(cfg)
+    runner = Runner(detector)
     # Start training.
     runner.train()
 
