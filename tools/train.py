@@ -14,8 +14,116 @@ from kd.engine.optim import OptimWrapper
 from kd.engine.hooks import CheckpointHook, LoggerHook
 from kd.models.task_modules.samplers.pseudo_sampler import PseudoSampler
 
+from kd.engine.dataset import CocoDataset
+from torch.utils.data import DataLoader
+
+
 
 def main():
+
+    """
+
+     dataset=dict(
+        type=dataset_type,
+        data_root=data_root,
+        ann_file='annotations/instances_train2017.json',
+        data_prefix=dict(img='train2017/'),
+        filter_cfg=dict(filter_empty_gt=True, min_size=32),
+        pipeline=train_pipeline))
+
+    dataset = DATASETS.build(dataset_cfg)
+
+
+
+     data_loader = DataLoader(
+            dataset=dataset,
+            sampler=sampler if batch_sampler is None else None,
+            batch_sampler=batch_sampler,
+            collate_fn=collate_fn,
+            worker_init_fn=init_fn,
+            **dataloader_cfg)
+        return data_loader
+
+
+
+
+
+
+        def __init__(self,
+                 ann_file: Optional[str] = '',
+                 metainfo: Union[Mapping, Config, None] = None,
+                 data_root: Optional[str] = '',
+                 data_prefix: dict = dict(img_path=''),
+                 filter_cfg: Optional[dict] = None,
+                 indices: Optional[Union[int, Sequence[int]]] = None,
+                 serialize_data: bool = True,
+                 pipeline: List[Union[dict, Callable]] = [],
+                 test_mode: bool = False,
+                 lazy_init: bool = False,
+                 max_refetch: int = 1000):
+
+
+    train_pipeline = [
+    dict(type='LoadImageFromFile', file_client_args=file_client_args),
+    dict(type='LoadAnnotations', with_bbox=True),
+    dict(type='Resize', scale=(1333, 800), keep_ratio=True),
+    dict(type='RandomFlip', prob=0.5),
+    dict(type='PackDetInputs')
+]
+test_pipeline = [
+    dict(type='LoadImageFromFile', file_client_args=file_client_args),
+    dict(type='Resize', scale=(1333, 800), keep_ratio=True),
+    # If you don't have a gt annotation, delete the pipeline
+    dict(type='LoadAnnotations', with_bbox=True),
+    dict(
+        type='PackDetInputs',
+        meta_keys=('img_id', 'img_path', 'ori_shape', 'img_shape',
+                   'scale_factor'))
+]
+    """
+
+    data_root = 'data/coco/'
+
+    file_client_args = dict(backend='disk')
+    train_pipeline = [
+        dict(type='LoadImageFromFile', file_client_args=file_client_args),
+        dict(type='LoadAnnotations', with_bbox=True),
+        dict(type='Resize', scale=(1333, 800), keep_ratio=True),
+        dict(type='RandomFlip', prob=0.5),
+        dict(type='PackDetInputs')
+    ]
+
+    train_dataset = CocoDataset(
+        ann_file='annotations/instances_train2017.json',
+        data_root = data_root,
+        data_prefix=dict(img='train2017/'),
+        filter_cfg=dict(filter_empty_gt=True, min_size=32),
+        pipeline=train_pipeline
+    )
+
+
+    # sampler=dict(type='DefaultSampler', shuffle=True),
+    # batch_sampler=dict(type='AspectRatioBatchSampler'),
+    sampler = None                  # TODO: should use torch sampler or get from engine
+
+    # train dataloader
+    train_dataloader = DataLoader(
+        dataset = train_dataset,
+        sampler = sampler,
+        # batch_sampler=None,
+    )
+
+
+
+
+
+    
+    # DetDataPreprocessor forward method expects 
+    # data (dict): Data sampled from dataloader.
+    # should see where is it being called from.
+    
+
+
     # Define the training configuration inline.
     # This dictionary replicates what you would normally place in a config file.
     teacher_data_preprocessor = DetDataPreprocessor(
