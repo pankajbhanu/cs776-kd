@@ -8,8 +8,8 @@ from typing import Iterable, List, Optional, Union
 
 import torch.nn as nn
 
-from ...engine.dist import master_only
-from ...engine.kdlogger import MMLogger, print_log
+from ..engine.dist import master_only
+from ..engine.kdlogger import MMLogger, print_log
 from .weight_init import PretrainedInit, initialize, update_init_info
 # from .wrappers.utils import is_model_wrapper
 

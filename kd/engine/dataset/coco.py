@@ -5,11 +5,11 @@ from typing import List, Union
 
 # from .registry import DATASETS
 from .coco_api import COCO
-from .base_det_dataset import BaseDetDataset
+from .base_det_dataset import BaseDataset
 
 
 # @DATASETS.register_module()
-class CocoDataset(BaseDetDataset):
+class CocoDataset(BaseDataset):
     """Dataset for COCO."""
 
     METAINFO = {

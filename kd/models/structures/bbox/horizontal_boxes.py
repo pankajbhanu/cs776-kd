@@ -6,14 +6,14 @@ import numpy as np
 import torch
 from torch import BoolTensor, Tensor
 
-from ..mask.structures import BitmapMasks, PolygonMasks
+# from ..mask.structures import BitmapMasks, PolygonMasks
 from .base_boxes import BaseBoxes
 from .bbox_overlaps import bbox_overlaps
 from .box_type import register_box
 
 T = TypeVar('T')
 DeviceType = Union[str, torch.device]
-MaskType = Union[BitmapMasks, PolygonMasks]
+# MaskType = Union[BitmapMasks, PolygonMasks]
 
 
 @register_box(name='hbox')
@@ -368,45 +368,45 @@ class HorizontalBoxes(BaseBoxes):
             is_aligned=is_aligned,
             eps=eps)
 
-    @staticmethod
-    def from_instance_masks(masks: MaskType) -> 'HorizontalBoxes':
-        """Create horizontal boxes from instance masks.
+    # @staticmethod
+    # def from_instance_masks(masks: MaskType) -> 'HorizontalBoxes':
+    #     """Create horizontal boxes from instance masks.
 
-        Args:
-            masks (:obj:`BitmapMasks` or :obj:`PolygonMasks`): BitmapMasks or
-                PolygonMasks instance with length of n.
+    #     Args:
+    #         masks (:obj:`BitmapMasks` or :obj:`PolygonMasks`): BitmapMasks or
+    #             PolygonMasks instance with length of n.
 
-        Returns:
-            :obj:`HorizontalBoxes`: Converted boxes with shape of (n, 4).
-        """
-        num_masks = len(masks)
-        boxes = np.zeros((num_masks, 4), dtype=np.float32)
-        if isinstance(masks, BitmapMasks):
-            x_any = masks.masks.any(axis=1)
-            y_any = masks.masks.any(axis=2)
-            for idx in range(num_masks):
-                x = np.where(x_any[idx, :])[0]
-                y = np.where(y_any[idx, :])[0]
-                if len(x) > 0 and len(y) > 0:
-                    # use +1 for x_max and y_max so that the right and bottom
-                    # boundary of instance masks are fully included by the box
-                    boxes[idx, :] = np.array(
-                        [x[0], y[0], x[-1] + 1, y[-1] + 1], dtype=np.float32)
-        elif isinstance(masks, PolygonMasks):
-            for idx, poly_per_obj in enumerate(masks.masks):
-                # simply use a number that is big enough for comparison with
-                # coordinates
-                xy_min = np.array([masks.width * 2, masks.height * 2],
-                                  dtype=np.float32)
-                xy_max = np.zeros(2, dtype=np.float32)
-                for p in poly_per_obj:
-                    xy = np.array(p).reshape(-1, 2).astype(np.float32)
-                    xy_min = np.minimum(xy_min, np.min(xy, axis=0))
-                    xy_max = np.maximum(xy_max, np.max(xy, axis=0))
-                boxes[idx, :2] = xy_min
-                boxes[idx, 2:] = xy_max
-        else:
-            raise TypeError(
-                '`masks` must be `BitmapMasks`  or `PolygonMasks`, '
-                f'but got {type(masks)}.')
-        return HorizontalBoxes(boxes)
+    #     Returns:
+    #         :obj:`HorizontalBoxes`: Converted boxes with shape of (n, 4).
+    #     """
+    #     num_masks = len(masks)
+    #     boxes = np.zeros((num_masks, 4), dtype=np.float32)
+    #     if isinstance(masks, BitmapMasks):
+    #         x_any = masks.masks.any(axis=1)
+    #         y_any = masks.masks.any(axis=2)
+    #         for idx in range(num_masks):
+    #             x = np.where(x_any[idx, :])[0]
+    #             y = np.where(y_any[idx, :])[0]
+    #             if len(x) > 0 and len(y) > 0:
+    #                 # use +1 for x_max and y_max so that the right and bottom
+    #                 # boundary of instance masks are fully included by the box
+    #                 boxes[idx, :] = np.array(
+    #                     [x[0], y[0], x[-1] + 1, y[-1] + 1], dtype=np.float32)
+    #     elif isinstance(masks, PolygonMasks):
+    #         for idx, poly_per_obj in enumerate(masks.masks):
+    #             # simply use a number that is big enough for comparison with
+    #             # coordinates
+    #             xy_min = np.array([masks.width * 2, masks.height * 2],
+    #                               dtype=np.float32)
+    #             xy_max = np.zeros(2, dtype=np.float32)
+    #             for p in poly_per_obj:
+    #                 xy = np.array(p).reshape(-1, 2).astype(np.float32)
+    #                 xy_min = np.minimum(xy_min, np.min(xy, axis=0))
+    #                 xy_max = np.maximum(xy_max, np.max(xy, axis=0))
+    #             boxes[idx, :2] = xy_min
+    #             boxes[idx, 2:] = xy_max
+    #     else:
+    #         raise TypeError(
+    #             '`masks` must be `BitmapMasks`  or `PolygonMasks`, '
+    #             f'but got {type(masks)}.')
+    #     return HorizontalBoxes(boxes)

@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 from typing import List, Optional
 
-from ..engine.structures import BaseDataElement, InstanceData, PixelData
+from ...engine.structures import BaseDataElement, InstanceData, PixelData
 
 
 class DetDataSample(BaseDataElement):

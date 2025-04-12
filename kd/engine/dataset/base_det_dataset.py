@@ -10,11 +10,11 @@ from typing import Any, Callable, List, Optional, Sequence, Tuple, Union
 import numpy as np
 from torch.utils.data import Dataset
 
-from mmengine.config import Config
-from mmengine.fileio import join_path, list_from_file, load
-from mmengine.logging import print_log
-from mmengine.registry import TRANSFORMS
-from mmengine.utils import is_abs
+from ...engine.config import Config
+from ...engine.fileio import join_path, list_from_file, load
+from ...engine.kdlogger import print_log
+from ...engine.registry import TRANSFORMS
+from ...engine.utils import is_abs
 
 
 class Compose:

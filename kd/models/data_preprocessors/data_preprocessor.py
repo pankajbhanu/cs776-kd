@@ -5,7 +5,7 @@ from typing import List, Optional, Sequence, Tuple, Union
 import numpy as np
 import torch
 from .base_data_preprocessor import ImgDataPreprocessor
-from ..utils import is_seq_of
+from ..utils.lang_utils import is_seq_of
 
 from ..utils.misc import samplelist_boxtype2tensor
 from ..structures import DetDataSample

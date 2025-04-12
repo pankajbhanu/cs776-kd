@@ -7,3 +7,5 @@ detectron2/dataset
 **__pycache__
 work_dirs
 cs776kd.egg-info
+*.png
+*.pdf

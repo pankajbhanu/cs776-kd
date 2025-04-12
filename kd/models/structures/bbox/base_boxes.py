@@ -6,13 +6,13 @@ import numpy as np
 import torch
 from torch import BoolTensor, Tensor
 
-from ..mask.structures import BitmapMasks, PolygonMasks
+# from ..mask.structures import BitmapMasks, PolygonMasks
 
 T = TypeVar('T')
 DeviceType = Union[str, torch.device]
 IndexType = Union[slice, int, list, torch.LongTensor, torch.cuda.LongTensor,
                   torch.BoolTensor, torch.cuda.BoolTensor, np.ndarray]
-MaskType = Union[BitmapMasks, PolygonMasks]
+# MaskType = Union[BitmapMasks, PolygonMasks]
 
 
 class BaseBoxes(metaclass=ABCMeta):
@@ -535,15 +535,15 @@ class BaseBoxes(metaclass=ABCMeta):
         """
         pass
 
-    @abstractstaticmethod
-    def from_instance_masks(masks: MaskType) -> 'BaseBoxes':
-        """Create boxes from instance masks.
+    # @abstractstaticmethod
+    # def from_instance_masks(masks: MaskType) -> 'BaseBoxes':
+    #     """Create boxes from instance masks.
 
-        Args:
-            masks (:obj:`BitmapMasks` or :obj:`PolygonMasks`): BitmapMasks or
-                PolygonMasks instance with length of n.
+    #     Args:
+    #         masks (:obj:`BitmapMasks` or :obj:`PolygonMasks`): BitmapMasks or
+    #             PolygonMasks instance with length of n.
 
-        Returns:
-            :obj:`BaseBoxes`: Converted boxes with shape of (n, box_dim).
-        """
-        pass
+    #     Returns:
+    #         :obj:`BaseBoxes`: Converted boxes with shape of (n, box_dim).
+    #     """
+    #     pass

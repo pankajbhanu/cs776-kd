@@ -6,9 +6,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from ..structures import BaseDataElement
-from ..utils import is_seq_of
-from ..utils import stack_batch
+from ...engine.structures import BaseDataElement
+from ..utils.lang_utils import is_seq_of
+from ...engine.model.utils import stack_batch
 
 CastData = Union[tuple, dict, BaseDataElement, torch.Tensor, list, bytes, str,
                  None]
