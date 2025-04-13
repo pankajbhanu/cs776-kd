@@ -4,7 +4,7 @@ from typing import List, Optional, Tuple, Union
 
 import torch
 import torch.nn as nn
-from ..structures import InstanceData
+from ..structures.instance_data import InstanceData
 from torch import Tensor
 
 from ..structures.bbox import BaseBoxes, cat_boxes, get_box_tensor

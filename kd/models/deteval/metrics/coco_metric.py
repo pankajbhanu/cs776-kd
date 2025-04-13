@@ -13,7 +13,7 @@ from ....engine.fileio import FileClient, dump, load
 from ....engine.kdlogger import MMLogger
 from terminaltables import AsciiTable
 
-from mmdet.datasets.api_wrappers import COCO, COCOeval
+from .coco_api import COCO, COCOeval
 from ....engine.registry import METRICS
 from ...structures.mask import encode_mask_results
 from ..functional import eval_recalls
