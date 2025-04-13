@@ -5,12 +5,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
 
-from detectron2.utils.registry import MODELS
 from ..base_module import BaseModule
 # from mmdet.utils import ConfigType, MultiConfig, OptConfigType
 
 
-@MODELS.register_module()
 class FPN(BaseModule):
     r"""Feature Pyramid Network.
 

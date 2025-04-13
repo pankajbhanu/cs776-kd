@@ -1,5 +1,6 @@
 from pyexpat import model
 from kd.models.data_preprocessors.data_preprocessor import DetDataPreprocessor
+from kd.models.backbones import ResNet, resnet
 from torchview import draw_graph
 
 teacher_data_preprocessor = DetDataPreprocessor(
@@ -17,3 +18,6 @@ print(teacher_data_preprocessor)
 # # Save the graph to a file
 # model_graph.save('teacher_data_preprocessor.png')
 # Display the graph
+
+resnet = ResNet(depth=50, num_stages=4, out_indices=(0, 1, 2, 3), frozen_stages=-1)
+print(resnet)

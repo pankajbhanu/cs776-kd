@@ -1,4 +1,4 @@
-from kd.config.common.optim import SGD
+from torch.optim.sgd import SGD
 from kd.engine.runner import Runner
 from kd.models.cvops.nms import NMSop
 from kd.models.data_preprocessors.data_preprocessor import DetDataPreprocessor
@@ -330,10 +330,15 @@ test_pipeline = [
             collate_fn=dict(type="pseudo_collate"),
         ),
         train_cfg=dict(by_epoch=True, max_epochs=12, val_interval=1),
-        optim_wrapper=dict(
-            type="OptimWrapper",
-            optimizer=dict(type="SGD", lr=0.01, momentum=0.9, weight_decay=0.0001),
+        optim_wrapper = OptimWrapper(
+            optimizer=SGD(lr=0.01, momentum=0.9, weight_decay=0.0001),
+            accumulative_counts=1,
+            clip_grad=dict(max_norm=35, norm_type=2),
         ),
+        # optim_wrapper=dict(
+        #     type="OptimWrapper",
+        #     optimizer=dict(type="SGD", lr=0.01, momentum=0.9, weight_decay=0.0001),
+        # ),
         auto_scale_lr=dict(enable=True, base_batch_size=16),
         default_hooks=dict(
             checkpoint=dict(type="CheckpointHook", interval=12),
