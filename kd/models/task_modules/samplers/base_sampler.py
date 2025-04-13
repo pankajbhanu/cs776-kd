@@ -2,7 +2,7 @@
 from abc import ABCMeta, abstractmethod
 
 import torch
-from ...structures import InstanceData
+from ....engine.structures import InstanceData
 
 from ...structures.bbox import BaseBoxes, cat_boxes
 from ..assigners import AssignResult

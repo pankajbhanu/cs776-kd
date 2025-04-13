@@ -2,9 +2,9 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from mmcv.ops import sigmoid_focal_loss as _sigmoid_focal_loss
+from ...cv.ops import sigmoid_focal_loss as _sigmoid_focal_loss
 
-from mmdet.registry import MODELS
+from ..registry import MODELS
 from .utils import weight_reduce_loss
 
 

@@ -7,8 +7,8 @@ import torch
 import torch.nn as nn
 from torch import Tensor
 
-from mmdet.registry import MODELS
-from mmdet.structures.bbox import bbox_overlaps
+from ..registry import MODELS
+from ..structures.bbox import bbox_overlaps
 from .utils import weighted_loss
 
 

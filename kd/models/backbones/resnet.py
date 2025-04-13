@@ -24,10 +24,10 @@ class BasicBlock(BaseModule):
         super(BasicBlock, self).__init__(init_cfg)
         assert plugins is None, 'Not implemented yet.'
 
-        norm1 = nn.BatchNorm2d
-        self.norm1_name = 'norm1'
-        norm2 = nn.BatchNorm2d
-        self.norm2_name = 'norm2'
+        norm1 = nn.BatchNorm2d(planes)
+        self.norm1_name = 'bn1'
+        norm2 = nn.BatchNorm2d(planes)
+        self.norm2_name = 'bn2'
 
         self.conv1 = nn.Conv2d(
             inplanes,
@@ -37,6 +37,7 @@ class BasicBlock(BaseModule):
             padding=dilation,
             dilation=dilation,
             bias=False)
+        print(dir(norm1))
         self.add_module(self.norm1_name, norm1)
         self.conv2 = nn.Conv2d(planes, planes, 3, padding=1, bias=False)
         self.add_module(self.norm2_name, norm2)
@@ -105,7 +106,7 @@ class Bottleneck(BaseModule):
         If style is "pytorch", the stride-two layer is the 3x3 conv layer, if
         it is "caffe", the stride-two layer is the first 1x1 conv layer.
         """
-        super(Bottleneck, self).__init__(init_cfg)
+        super(Bottleneck, self).__init__()
         assert plugins is None or isinstance(plugins, list)
         if plugins is not None:
             allowed_position = ['after_conv1', 'after_conv2', 'after_conv3']
@@ -135,19 +136,19 @@ class Bottleneck(BaseModule):
                 if plugin['position'] == 'after_conv3'
             ]
 
-        if self.style == 'pytorch':
-            self.conv1_stride = 1
-            self.conv2_stride = stride
-        else:
-            self.conv1_stride = stride
-            self.conv2_stride = 1
+        # if self.style == 'pytorch':
+        #     self.conv1_stride = 1
+        #     self.conv2_stride = stride
+        # else:
+        self.conv1_stride = stride
+        self.conv2_stride = 1
 
         norm1 = nn.BatchNorm2d(planes)
         norm2 = nn.BatchNorm2d(planes)
         norm3 = nn.BatchNorm2d(planes * self.expansion)
-        self.norm1_name = 'norm1'
-        self.norm2_name = 'norm2'
-        self.norm3_name = 'norm3'
+        self.norm1_name = 'bn1'
+        self.norm2_name = 'bn2'
+        self.norm3_name = 'bn3'
 
         self.conv1 = nn.Conv2d(
             inplanes,
@@ -387,7 +388,6 @@ class ResNet(BaseModule):
                 num_blocks=num_blocks,
                 stride=stride,
                 dilation=dilation,
-                style='pytorch',
                 avg_down=self.avg_down,
                 with_cp=with_cp,
                 plugins=stage_plugins)
@@ -485,37 +485,34 @@ class ResNet(BaseModule):
                 nn.BatchNorm2d(stem_channels // 2)[1],
                 nn.ReLU(inplace=True),
                 nn.Conv2d(
-                    self.conv_cfg,
                     stem_channels // 2,
                     stem_channels // 2,
                     kernel_size=3,
                     stride=1,
                     padding=1,
                     bias=False),
-                nn.BatchNorm2d(self.norm_cfg, stem_channels // 2)[1],
+                nn.BatchNorm2d(stem_channels // 2)[1],
                 nn.ReLU(inplace=True),
                 nn.Conv2d(
-                    self.conv_cfg,
                     stem_channels // 2,
                     stem_channels,
                     kernel_size=3,
                     stride=1,
                     padding=1,
                     bias=False),
-                nn.BatchNorm2d(self.norm_cfg, stem_channels)[1],
+                nn.BatchNorm2d(stem_channels)[1],
                 nn.ReLU(inplace=True))
         else:
             self.conv1 = nn.Conv2d(
-                self.conv_cfg,
                 in_channels,
                 stem_channels,
                 kernel_size=7,
                 stride=2,
                 padding=3,
                 bias=False)
-            self.norm1_name, norm1 = nn.BatchNorm2d(
-                self.norm_cfg, stem_channels, postfix=1)
-            self.add_module(self.norm1_name, norm1)
+            self.norm1 = nn.BatchNorm2d(
+                stem_channels)
+            self.add_module('norm1', self.norm1)
             self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
 

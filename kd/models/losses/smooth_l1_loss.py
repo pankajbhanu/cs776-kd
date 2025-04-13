@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 from torch import Tensor
 
-from mmdet.registry import MODELS
+from ..registry import MODELS
 from .utils import weighted_loss
 
 

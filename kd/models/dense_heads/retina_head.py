@@ -51,7 +51,6 @@ class RetinaHead(AnchorHead):
             num_classes,
             in_channels,
             anchor_generator=anchor_generator,
-            init_cfg=init_cfg,
             **kwargs)
 
     def _init_layers(self):
@@ -67,18 +66,14 @@ class RetinaHead(AnchorHead):
                     self.feat_channels,
                     3,
                     stride=1,
-                    padding=1,
-                    conv_cfg=self.conv_cfg,
-                    norm_cfg=self.norm_cfg))
+                    padding=1))
             self.reg_convs.append(
                 nn.Conv2d(
                     in_channels,
                     self.feat_channels,
                     3,
                     stride=1,
-                    padding=1,
-                    conv_cfg=self.conv_cfg,
-                    norm_cfg=self.norm_cfg))
+                    padding=1))
             in_channels = self.feat_channels
         self.retina_cls = nn.Conv2d(
             in_channels,

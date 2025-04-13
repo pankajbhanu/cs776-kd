@@ -4,6 +4,8 @@ from typing import List, Optional, Tuple, Union
 
 import torch
 import torch.nn as nn
+
+from kd.models.detutils.typing_utils import OptConfigType
 from ..structures.instance_data import InstanceData
 from torch import Tensor
 
@@ -48,8 +50,8 @@ class AnchorHead(BaseDenseHead):
         bbox_coder: DeltaXYWHBBoxCoder,
         loss_cls: CrossEntropyLoss,
         loss_bbox: SmoothL1Loss,
-        train_cfg: dict,
-        test_cfg: dict,
+        train_cfg: OptConfigType=None,
+        test_cfg: OptConfigType=None,
         reg_decoded_bbox: bool = False,
         feat_channels: int = 256,
         ) -> None:
@@ -57,7 +59,7 @@ class AnchorHead(BaseDenseHead):
         self.in_channels = in_channels
         self.num_classes = num_classes
         self.feat_channels = feat_channels
-        self.use_sigmoid_cls = loss_cls.get('use_sigmoid', False)
+        self.use_sigmoid_cls = loss_cls.use_sigmoid
         if self.use_sigmoid_cls:
             self.cls_out_channels = num_classes
         else:

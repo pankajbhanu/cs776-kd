@@ -54,7 +54,7 @@ class ResLayer(nn.Sequential):
                     kernel_size=1,
                     stride=conv_stride,
                     bias=False),
-                nn.BatchNorm2d(planes * block.expansion)[1]
+                nn.BatchNorm2d(planes * block.expansion)
             ])
             downsample = nn.Sequential(*downsample)
 

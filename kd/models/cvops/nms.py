@@ -5,10 +5,10 @@ import torch
 from ...engine.utils import deprecated_api_warning
 from torch import Tensor
 
-from ..utils import ext_loader
+# from ...cv.ops.utils import ext_loader
 
-ext_module = ext_loader.load_ext(
-    '_ext', ['nms', 'softnms', 'nms_match', 'nms_rotated', 'nms_quadri'])
+# ext_module = ext_loader.load_ext(
+#     '_ext', ['nms', 'softnms', 'nms_match', 'nms_rotated', 'nms_quadri'])
 
 
 # This function is modified from: https://github.com/pytorch/vision/

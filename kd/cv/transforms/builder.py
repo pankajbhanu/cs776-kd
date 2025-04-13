@@ -1,2 +1,2 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-from mmengine.registry import TRANSFORMS  # noqa: F401
+from ...engine.registry import TRANSFORMS  # noqa: F401

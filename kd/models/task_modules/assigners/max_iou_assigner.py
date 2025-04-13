@@ -2,12 +2,12 @@
 from typing import Optional, Union
 
 import torch
-from ...structures import InstanceData
+from ....engine.structures import InstanceData
 from torch import Tensor
 
 from .assign_result import AssignResult
 from .base_assigner import BaseAssigner
-from iou2d_calculator import BboxOverlaps2D
+from .iou2d_calculator import BboxOverlaps2D
 
 
 class MaxIoUAssigner(BaseAssigner):

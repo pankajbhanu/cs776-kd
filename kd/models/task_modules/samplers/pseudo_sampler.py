@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
-from ...structures import InstanceData
+from ....engine.structures import InstanceData
 
 from ..assigners import AssignResult
 from .base_sampler import BaseSampler

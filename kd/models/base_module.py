@@ -10,7 +10,7 @@ import torch.nn as nn
 
 from ..engine.dist import master_only
 from ..engine.kdlogger import MMLogger, print_log
-from .weight_init import PretrainedInit, initialize, update_init_info
+from ..engine.model.weight_init import PretrainedInit, initialize, update_init_info
 # from .wrappers.utils import is_model_wrapper
 
 

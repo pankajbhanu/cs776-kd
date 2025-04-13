@@ -7,10 +7,10 @@ from torch.autograd import Function
 from torch.autograd.function import once_differentiable
 from torch.nn.modules.utils import _pair
 
-from ..utils import ext_loader
+# from ...engine.utils import ext_loader
 
-ext_module = ext_loader.load_ext('_ext',
-                                 ['roi_pool_forward', 'roi_pool_backward'])
+# ext_module = ext_loader.load_ext('_ext',
+#                                  ['roi_pool_forward', 'roi_pool_backward'])
 
 
 class RoIPoolFunction(Function):

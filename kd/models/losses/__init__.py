@@ -9,7 +9,7 @@ from .iou_loss import (BoundedIoULoss, CIoULoss, DIoULoss, EIoULoss, GIoULoss,
 from .kd_loss import KnowledgeDistillationKLDivLoss, KDQualityFocalLoss
 from .smooth_l1_loss import L1Loss, SmoothL1Loss, l1_loss, smooth_l1_loss
 from .utils import reduce_loss, weight_reduce_loss, weighted_loss
-from .pkd_loss import PKDLoss
+# from .pkd_loss import PKDLoss
 
 __all__ = [
     'accuracy', 'Accuracy', 'cross_entropy', 'binary_cross_entropy',

@@ -5,13 +5,14 @@ from typing import List, Optional, Tuple
 
 import torch
 from ..cvops import batched_nms
-from ..structures import InstanceData
+from ...engine.structures import InstanceData
 from torch import Tensor
 
 from ..structures import SampleList
 from ..structures.bbox import (cat_boxes, get_box_tensor, get_box_wh,
                                    scale_boxes)
-from ..utils import InstanceList, OptMultiConfig
+from ..structures import InstanceList
+from kd.models.detutils import OptMultiConfig
 from ..utils import (filter_scores_and_topk, select_single_mlvl,
                      unpack_gt_instances)
 from ..base_module import BaseModule

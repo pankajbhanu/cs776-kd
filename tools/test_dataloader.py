@@ -14,4 +14,22 @@ train_dataloader = dict(
         pipeline=train_pipeline))
 """
 
+from torch.utils.data import DataLoader
+from tools.test_dataset import train_dataset
 
+from mmengine.dataset import DefaultSampler, default_collate
+
+
+
+sampler = DefaultSampler(train_dataset, shuffle=True)
+
+
+
+train_dataloader = DataLoader(
+    dataset=train_dataset,
+    sampler=sampler,
+    collate_fn=default_collate,
+    batch_size=5,
+)
+
+print(train_dataloader)

@@ -5,6 +5,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
 
+from kd.models.detutils.typing_utils import ConfigType
+
 from ..base_module import BaseModule
 # from mmdet.utils import ConfigType, MultiConfig, OptConfigType
 
@@ -74,6 +76,7 @@ class FPN(BaseModule):
         add_extra_convs: Union[bool, str] = False,
         relu_before_extra_convs: bool = False,
         no_norm_on_lateral: bool = False,
+        upsample_cfg: ConfigType = dict(mode='nearest'),
         ) -> None:
         super().__init__()
         assert isinstance(in_channels, list)
@@ -84,6 +87,8 @@ class FPN(BaseModule):
         self.relu_before_extra_convs = relu_before_extra_convs
         self.no_norm_on_lateral = no_norm_on_lateral
         self.fp16_enabled = False
+        self.upsample_cfg = upsample_cfg.copy()
+
         if end_level == -1 or end_level == self.num_ins - 1:
             self.backbone_end_level = self.num_ins
             assert num_outs >= self.num_ins - start_level

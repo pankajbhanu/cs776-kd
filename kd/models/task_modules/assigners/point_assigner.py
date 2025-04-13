@@ -2,7 +2,7 @@
 from typing import Optional
 
 import torch
-from ..engine.structures import InstanceData
+from ....engine.structures import InstanceData
 
 from mmdet.registry import TASK_UTILS
 from .assign_result import AssignResult

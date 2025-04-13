@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
-from ...cvops import point_sample
+from ...cv.ops import point_sample
 from torch import Tensor
 
 

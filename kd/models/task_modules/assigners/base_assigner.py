@@ -2,7 +2,7 @@
 from abc import ABCMeta, abstractmethod
 from typing import Optional
 
-from ...structures import InstanceData
+from ....engine.structures import InstanceData
 
 
 class BaseAssigner(metaclass=ABCMeta):
