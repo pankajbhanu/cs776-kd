@@ -14,7 +14,7 @@ from torch.autograd.function import Function, once_differentiable
 
 from mmcv.utils import (IS_CUDA_AVAILABLE, IS_MLU_AVAILABLE, IS_MUSA_AVAILABLE,
                         IS_NPU_AVAILABLE)
-from ..cvutils import ext_loader
+from ..utils import ext_loader
 
 ext_module = ext_loader.load_ext(
     '_ext', ['ms_deform_attn_backward', 'ms_deform_attn_forward'])

@@ -69,7 +69,7 @@ def collect_env():
     # env_info['MMCV'] = mmcv.__version__
 
     try:
-        from ..cvops import get_compiler_version, get_compiling_cuda_version
+        from ..ops import get_compiler_version, get_compiling_cuda_version
     except ModuleNotFoundError:
         env_info['MMCV Compiler'] = 'n/a'
         env_info['MMCV CUDA Compiler'] = 'n/a'

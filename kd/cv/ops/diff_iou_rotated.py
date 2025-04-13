@@ -7,7 +7,7 @@ import torch
 from torch import Tensor
 from torch.autograd import Function
 
-from ..cvutils import ext_loader
+from ..utils import ext_loader
 
 EPSILON = 1e-8
 ext_module = ext_loader.load_ext('_ext',

@@ -10,7 +10,7 @@ from torch import Tensor
 from torch.autograd import Function
 from torch.nn.modules.module import Module
 
-from ..cvutils import ext_loader
+from ..utils import ext_loader
 
 ext_module = ext_loader.load_ext('_ext', [
     'carafe_naive_forward', 'carafe_naive_backward', 'carafe_forward',

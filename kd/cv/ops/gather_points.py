@@ -3,7 +3,7 @@ from typing import Tuple
 import torch
 from torch.autograd import Function
 
-from ..cvutils import ext_loader
+from ..utils import ext_loader
 
 ext_module = ext_loader.load_ext(
     '_ext', ['gather_points_forward', 'gather_points_backward'])

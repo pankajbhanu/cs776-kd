@@ -100,7 +100,7 @@ import torch.nn.functional as F
 from torch import nn
 from torch.autograd import Function
 
-from ..cvutils import ext_loader
+from ..utils import ext_loader
 
 ext_module = ext_loader.load_ext('_ext', ['fused_bias_leakyrelu'])
 

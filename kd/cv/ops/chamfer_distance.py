@@ -6,7 +6,7 @@ from torch import Tensor
 from torch.autograd import Function
 from torch.autograd.function import once_differentiable
 
-from ..cvutils import ext_loader
+from ..utils import ext_loader
 
 ext_module = ext_loader.load_ext(
     '_ext', ['chamfer_distance_forward', 'chamfer_distance_backward'])

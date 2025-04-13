@@ -5,7 +5,7 @@ import numpy as np
 import torch
 from torch import Tensor
 
-from ..cvutils import ext_loader
+from ..utils import ext_loader
 
 ext_module = ext_loader.load_ext('_ext', ['pixel_group'])
 

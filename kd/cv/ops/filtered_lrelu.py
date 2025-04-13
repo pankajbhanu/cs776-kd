@@ -13,7 +13,7 @@ from typing import Dict, Optional, Union
 import numpy as np
 import torch
 
-from ..cvutils import IS_MUSA_AVAILABLE, ext_loader
+from ..utils import IS_MUSA_AVAILABLE, ext_loader
 from .bias_act import bias_act
 from .upfirdn2d import _get_filter_size, _parse_padding, upfirdn2d
 

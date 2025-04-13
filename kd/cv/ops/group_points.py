@@ -5,7 +5,7 @@ import torch
 from torch import nn as nn
 from torch.autograd import Function
 
-from ..cvutils import ext_loader
+from ..utils import ext_loader
 from .ball_query import ball_query
 from .knn import knn
 

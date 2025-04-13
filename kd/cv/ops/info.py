@@ -10,7 +10,7 @@ if torch.__version__ == 'parrots':
     def get_compiling_cuda_version():
         return parrots.version.cuda
 else:
-    from ..cvutils import ext_loader
+    from ..utils import ext_loader
     ext_module = ext_loader.load_ext(
         '_ext', ['get_compiler_version', 'get_compiling_cuda_version'])
 

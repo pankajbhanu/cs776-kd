@@ -3,7 +3,7 @@ from typing import Tuple
 
 import torch
 
-from ..cvutils import ext_loader
+from ..utils import ext_loader
 
 ext_module = ext_loader.load_ext('_ext', ['convex_iou', 'convex_giou'])
 

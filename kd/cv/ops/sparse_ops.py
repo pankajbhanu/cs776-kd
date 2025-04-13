@@ -14,7 +14,7 @@
 
 import torch
 
-from ..cvutils import ext_loader
+from ..utils import ext_loader
 
 ext_module = ext_loader.load_ext('_ext', [
     'get_indice_pairs_2d_forward', 'get_indice_pairs_3d_forward',

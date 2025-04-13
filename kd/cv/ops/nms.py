@@ -5,7 +5,7 @@ import torch
 from mmengine.utils import deprecated_api_warning
 from torch import Tensor
 
-from ..cvutils import ext_loader
+from ..utils import ext_loader
 
 ext_module = ext_loader.load_ext(
     '_ext', ['nms', 'softnms', 'nms_match', 'nms_rotated', 'nms_quadri'])

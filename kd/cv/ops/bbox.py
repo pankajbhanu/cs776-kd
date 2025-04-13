@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
 
-from ..cvutils import ext_loader
+from ..utils import ext_loader
 
 # ext_module = ext_loader.load_ext('_ext', ['bbox_overlaps'])
 

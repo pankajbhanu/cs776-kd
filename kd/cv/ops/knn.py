@@ -4,7 +4,7 @@ import torch
 from mmengine.device import is_cuda_available, is_musa_available
 from torch.autograd import Function
 
-from ..cvutils import ext_loader
+from ..utils import ext_loader
 
 ext_module = ext_loader.load_ext('_ext', ['knn_forward'])
 

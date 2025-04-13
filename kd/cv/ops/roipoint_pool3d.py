@@ -4,7 +4,7 @@ import torch
 from torch import nn as nn
 from torch.autograd import Function
 
-from ..cvutils import ext_loader
+from ..utils import ext_loader
 
 ext_module = ext_loader.load_ext('_ext', ['roipoint_pool3d_forward'])
 

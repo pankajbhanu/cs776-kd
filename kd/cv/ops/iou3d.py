@@ -5,7 +5,7 @@ from typing import Optional
 import torch
 from torch import Tensor
 
-from ..cvutils import ext_loader
+from ..utils import ext_loader
 
 ext_module = ext_loader.load_ext('_ext', [
     'iou3d_boxes_overlap_bev_forward', 'iou3d_nms3d_forward',

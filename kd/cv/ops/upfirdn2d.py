@@ -12,7 +12,7 @@ from typing import Dict, List, Union
 
 import torch
 
-from ..cvutils import ext_loader
+from ..utils import ext_loader
 from .conv2d_gradfix import conv2d
 
 ext_module = ext_loader.load_ext('_ext', ['upfirdn2d'])
