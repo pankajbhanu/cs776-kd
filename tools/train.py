@@ -1,4 +1,4 @@
-from torch.optim.sgd import SGD
+from kd.config.common.optim import SGD
 from kd.engine.runner import Runner
 from kd.models.cvops.nms import NMSop
 from kd.models.data_preprocessors.data_preprocessor import DetDataPreprocessor
@@ -17,7 +17,7 @@ from kd.models.task_modules.samplers.pseudo_sampler import PseudoSampler
 from kd.engine.dataset import CocoDataset
 from torch.utils.data import DataLoader
 
-from .test_dataset import train_dataset
+from .a import train_dataset
 
 
 
@@ -216,13 +216,8 @@ test_pipeline = [
     optim_wrapper = OptimWrapper(
         optimizer=SGD(lr=0.01, momentum=0.9, weight_decay=0.0001)
     )
-    kd_cfg=dict(
-                loss_cls_kd=loss_cls_kd,
-                loss_reg_kd=loss_reg_kd,
-                reused_teacher_head_idx=reused_teacher_head_index,
-            )
-    checkpoint_hook = CheckpointHook()
-    logger_hook = LoggerHook()
+    checkpoint_hook = CheckpointHook(interval=12)
+    logger_hook = LoggerHook
     cfg = dict(
         model=dict(
             type="CrossKDRetinaNet",
@@ -320,19 +315,14 @@ test_pipeline = [
             collate_fn=dict(type="pseudo_collate"),
         ),
         train_cfg=dict(by_epoch=True, max_epochs=12, val_interval=1),
-        optim_wrapper = OptimWrapper(
-            optimizer=SGD(lr=0.01, momentum=0.9, weight_decay=0.0001),
-            accumulative_counts=1,
-            clip_grad=dict(max_norm=35, norm_type=2),
+        optim_wrapper=dict(
+            type="OptimWrapper",
+            optimizer=dict(type="SGD", lr=0.01, momentum=0.9, weight_decay=0.0001),
         ),
-        # optim_wrapper=dict(
-        #     type="OptimWrapper",
-        #     optimizer=dict(type="SGD", lr=0.01, momentum=0.9, weight_decay=0.0001),
-        # ),
         auto_scale_lr=dict(enable=True, base_batch_size=16),
         default_hooks=dict(
-            checkpoint=CheckpointHook(),
-            logger=LoggerHook(),
+            checkpoint=dict(type="CheckpointHook", interval=12),
+            logger=dict(type="LoggerHook"),
         ),
         launcher="none",
     )
