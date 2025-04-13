@@ -231,8 +231,13 @@ test_pipeline = [
     optim_wrapper = OptimWrapper(
         optimizer=SGD(lr=0.01, momentum=0.9, weight_decay=0.0001)
     )
-    checkpoint_hook = CheckpointHook(interval=12)
-    logger_hook = LoggerHook
+    kd_cfg=dict(
+                loss_cls_kd=loss_cls_kd,
+                loss_reg_kd=loss_reg_kd,
+                reused_teacher_head_idx=reused_teacher_head_index,
+            )
+    checkpoint_hook = CheckpointHook()
+    logger_hook = LoggerHook()
     cfg = dict(
         model=dict(
             type="CrossKDRetinaNet",
@@ -341,8 +346,8 @@ test_pipeline = [
         # ),
         auto_scale_lr=dict(enable=True, base_batch_size=16),
         default_hooks=dict(
-            checkpoint=dict(type="CheckpointHook", interval=12),
-            logger=dict(type="LoggerHook"),
+            checkpoint=CheckpointHook(),
+            logger=LoggerHook(),
         ),
         launcher="none",
     )

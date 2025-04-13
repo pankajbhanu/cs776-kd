@@ -3,7 +3,7 @@ from typing import Any
 
 import torch
 import torch.nn as nn
-from ..engine.utils import deprecated_api_warning
+from ...engine.utils import deprecated_api_warning
 from torch.autograd import Function
 from torch.autograd.function import once_differentiable
 from torch.nn.modules.utils import _pair
