@@ -114,10 +114,6 @@ test_pipeline = [
     )
 
 
-
-
-
-    
     # DetDataPreprocessor forward method expects 
     # data (dict): Data sampled from dataloader.
     # should see where is it being called from.

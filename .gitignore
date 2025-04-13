@@ -9,3 +9,12 @@ work_dirs
 cs776kd.egg-info
 *.png
 *.pdf
+kd/data/
+data/
+
+*.hpp
+*.cpp
+*.cuh
+*.muh
+kd/cv/cvops/csrc
+.Ds_Store
