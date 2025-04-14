@@ -5,7 +5,7 @@ import torch
 from ....engine.config import ConfigDict
 from ....engine.structures import InstanceData
 
-from mmdet.registry import TASK_UTILS
+from ...registry import TASK_UTILS
 from .assign_result import AssignResult
 from .max_iou_assigner import MaxIoUAssigner
 
