@@ -1,12 +1,12 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import numpy as np
-from mmcv.transforms import to_tensor
-from mmcv.transforms.base import BaseTransform
-from mmengine.structures import InstanceData, PixelData
+from ....cv.transforms import to_tensor
+from ....cv.transforms.base import BaseTransform
+from ....engine.structures import InstanceData, PixelData
 
-from mmdet.registry import TRANSFORMS
-from mmdet.structures import DetDataSample
-from mmdet.structures.bbox import BaseBoxes
+from ...registry import TRANSFORMS
+from ...structures import DetDataSample
+from ...structures.bbox import BaseBoxes
 
 
 @TRANSFORMS.register_module()

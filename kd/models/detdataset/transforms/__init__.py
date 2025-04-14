@@ -1,12 +1,12 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-from .augment_wrappers import AutoAugment, RandAugment
-from .colorspace import (AutoContrast, Brightness, Color, ColorTransform,
-                         Contrast, Equalize, Invert, Posterize, Sharpness,
-                         Solarize, SolarizeAdd)
+# from .augment_wrappers import AutoAugment, RandAugment
+# from .colorspace import (AutoContrast, Brightness, Color, ColorTransform,
+#                          Contrast, Equalize, Invert, Posterize, Sharpness,
+#                          Solarize, SolarizeAdd)
 from .formatting import ImageToTensor, PackDetInputs, ToTensor, Transpose
-from .geometric import (GeomTransform, Rotate, ShearX, ShearY, TranslateX,
-                        TranslateY)
-from .instaboost import InstaBoost
+# from .geometric import (GeomTransform, Rotate, ShearX, ShearY, TranslateX,
+#                         TranslateY)
+# from .instaboost import InstaBoost
 from .loading import (FilterAnnotations, InferencerLoader, LoadAnnotations,
                       LoadEmptyAnnotations, LoadImageFromNDArray,
                       LoadMultiChannelImageFromFiles, LoadPanopticAnnotations,

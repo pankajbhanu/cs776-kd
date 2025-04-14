@@ -3,129 +3,129 @@ from typing import Any
 
 import torch
 import torch.nn as nn
-from mmengine.utils import deprecated_api_warning
+from ...engine.utils import deprecated_api_warning
 from torch.autograd import Function
 from torch.autograd.function import once_differentiable
 from torch.nn.modules.utils import _pair
 
-from ..utils import ext_loader
+# from ..utils import ext_loader
 
-ext_module = ext_loader.load_ext('_ext',
-                                 ['roi_align_forward', 'roi_align_backward'])
-
-
-class RoIAlignFunction(Function):
-
-    @staticmethod
-    def symbolic(g, input, rois, output_size, spatial_scale, sampling_ratio,
-                 pool_mode, aligned):
-        from torch.onnx import TensorProtoDataType
-        from torch.onnx.symbolic_opset9 import sub
-
-        def _select(g, self, dim, index):
-            return g.op('Gather', self, index, axis_i=dim)
-
-        # batch_indices = rois[:, 0].long()
-        batch_indices = _select(
-            g, rois, 1,
-            g.op('Constant', value_t=torch.tensor([0], dtype=torch.long)))
-        batch_indices = g.op('Squeeze', batch_indices, axes_i=[1])
-        batch_indices = g.op(
-            'Cast', batch_indices, to_i=TensorProtoDataType.INT64)
-        # rois = rois[:, 1:]
-        rois = _select(
-            g, rois, 1,
-            g.op(
-                'Constant',
-                value_t=torch.tensor([1, 2, 3, 4], dtype=torch.long)))
-
-        if aligned:
-            # rois -= 0.5/spatial_scale
-            aligned_offset = g.op(
-                'Constant',
-                value_t=torch.tensor([0.5 / spatial_scale],
-                                     dtype=torch.float32))
-            rois = sub(g, rois, aligned_offset)
-        # roi align
-        return g.op(
-            'RoiAlign',
-            input,
-            rois,
-            batch_indices,
-            output_height_i=output_size[0],
-            output_width_i=output_size[1],
-            spatial_scale_f=spatial_scale,
-            sampling_ratio_i=max(0, sampling_ratio),
-            mode_s=pool_mode)
-
-    @staticmethod
-    def forward(ctx: Any,
-                input: torch.Tensor,
-                rois: torch.Tensor,
-                output_size: int,
-                spatial_scale: float = 1.0,
-                sampling_ratio: int = 0,
-                pool_mode: str = 'avg',
-                aligned: bool = True) -> torch.Tensor:
-        ctx.output_size = _pair(output_size)
-        ctx.spatial_scale = spatial_scale
-        ctx.sampling_ratio = sampling_ratio
-        assert pool_mode in ('max', 'avg')
-        ctx.pool_mode = 0 if pool_mode == 'max' else 1
-        ctx.aligned = aligned
-        ctx.input_shape = input.size()
-
-        assert rois.size(1) == 5, 'RoI must be (idx, x1, y1, x2, y2)!'
-
-        output_shape = (rois.size(0), input.size(1), ctx.output_size[0],
-                        ctx.output_size[1])
-        output = input.new_zeros(output_shape)
-        if ctx.pool_mode == 0:
-            argmax_y = input.new_zeros(output_shape)
-            argmax_x = input.new_zeros(output_shape)
-        else:
-            argmax_y = input.new_zeros(0)
-            argmax_x = input.new_zeros(0)
-
-        ext_module.roi_align_forward(
-            input,
-            rois,
-            output,
-            argmax_y,
-            argmax_x,
-            aligned_height=ctx.output_size[0],
-            aligned_width=ctx.output_size[1],
-            spatial_scale=ctx.spatial_scale,
-            sampling_ratio=ctx.sampling_ratio,
-            pool_mode=ctx.pool_mode,
-            aligned=ctx.aligned)
-
-        ctx.save_for_backward(rois, argmax_y, argmax_x)
-        return output
-
-    @staticmethod
-    @once_differentiable
-    def backward(ctx: Any, grad_output: torch.Tensor) -> tuple:
-        rois, argmax_y, argmax_x = ctx.saved_tensors
-        grad_input = grad_output.new_zeros(ctx.input_shape)
-        # complex head architecture may cause grad_output uncontiguous.
-        grad_output = grad_output.contiguous()
-        ext_module.roi_align_backward(
-            grad_output,
-            rois,
-            argmax_y,
-            argmax_x,
-            grad_input,
-            aligned_height=ctx.output_size[0],
-            aligned_width=ctx.output_size[1],
-            spatial_scale=ctx.spatial_scale,
-            sampling_ratio=ctx.sampling_ratio,
-            pool_mode=ctx.pool_mode,
-            aligned=ctx.aligned)
-        return grad_input, None, None, None, None, None, None
+# ext_module = ext_loader.load_ext('_ext',
+#                                  ['roi_align_forward', 'roi_align_backward'])
 
 
-roi_align = RoIAlignFunction.apply
+# class RoIAlignFunction(Function):
+
+#     @staticmethod
+#     def symbolic(g, input, rois, output_size, spatial_scale, sampling_ratio,
+#                  pool_mode, aligned):
+#         from torch.onnx import TensorProtoDataType
+#         from torch.onnx.symbolic_opset9 import sub
+
+#         def _select(g, self, dim, index):
+#             return g.op('Gather', self, index, axis_i=dim)
+
+#         # batch_indices = rois[:, 0].long()
+#         batch_indices = _select(
+#             g, rois, 1,
+#             g.op('Constant', value_t=torch.tensor([0], dtype=torch.long)))
+#         batch_indices = g.op('Squeeze', batch_indices, axes_i=[1])
+#         batch_indices = g.op(
+#             'Cast', batch_indices, to_i=TensorProtoDataType.INT64)
+#         # rois = rois[:, 1:]
+#         rois = _select(
+#             g, rois, 1,
+#             g.op(
+#                 'Constant',
+#                 value_t=torch.tensor([1, 2, 3, 4], dtype=torch.long)))
+
+#         if aligned:
+#             # rois -= 0.5/spatial_scale
+#             aligned_offset = g.op(
+#                 'Constant',
+#                 value_t=torch.tensor([0.5 / spatial_scale],
+#                                      dtype=torch.float32))
+#             rois = sub(g, rois, aligned_offset)
+#         # roi align
+#         return g.op(
+#             'RoiAlign',
+#             input,
+#             rois,
+#             batch_indices,
+#             output_height_i=output_size[0],
+#             output_width_i=output_size[1],
+#             spatial_scale_f=spatial_scale,
+#             sampling_ratio_i=max(0, sampling_ratio),
+#             mode_s=pool_mode)
+
+#     @staticmethod
+#     def forward(ctx: Any,
+#                 input: torch.Tensor,
+#                 rois: torch.Tensor,
+#                 output_size: int,
+#                 spatial_scale: float = 1.0,
+#                 sampling_ratio: int = 0,
+#                 pool_mode: str = 'avg',
+#                 aligned: bool = True) -> torch.Tensor:
+#         ctx.output_size = _pair(output_size)
+#         ctx.spatial_scale = spatial_scale
+#         ctx.sampling_ratio = sampling_ratio
+#         assert pool_mode in ('max', 'avg')
+#         ctx.pool_mode = 0 if pool_mode == 'max' else 1
+#         ctx.aligned = aligned
+#         ctx.input_shape = input.size()
+
+#         assert rois.size(1) == 5, 'RoI must be (idx, x1, y1, x2, y2)!'
+
+#         output_shape = (rois.size(0), input.size(1), ctx.output_size[0],
+#                         ctx.output_size[1])
+#         output = input.new_zeros(output_shape)
+#         if ctx.pool_mode == 0:
+#             argmax_y = input.new_zeros(output_shape)
+#             argmax_x = input.new_zeros(output_shape)
+#         else:
+#             argmax_y = input.new_zeros(0)
+#             argmax_x = input.new_zeros(0)
+
+#         ext_module.roi_align_forward(
+#             input,
+#             rois,
+#             output,
+#             argmax_y,
+#             argmax_x,
+#             aligned_height=ctx.output_size[0],
+#             aligned_width=ctx.output_size[1],
+#             spatial_scale=ctx.spatial_scale,
+#             sampling_ratio=ctx.sampling_ratio,
+#             pool_mode=ctx.pool_mode,
+#             aligned=ctx.aligned)
+
+#         ctx.save_for_backward(rois, argmax_y, argmax_x)
+#         return output
+
+#     @staticmethod
+#     @once_differentiable
+#     def backward(ctx: Any, grad_output: torch.Tensor) -> tuple:
+#         rois, argmax_y, argmax_x = ctx.saved_tensors
+#         grad_input = grad_output.new_zeros(ctx.input_shape)
+#         # complex head architecture may cause grad_output uncontiguous.
+#         grad_output = grad_output.contiguous()
+#         ext_module.roi_align_backward(
+#             grad_output,
+#             rois,
+#             argmax_y,
+#             argmax_x,
+#             grad_input,
+#             aligned_height=ctx.output_size[0],
+#             aligned_width=ctx.output_size[1],
+#             spatial_scale=ctx.spatial_scale,
+#             sampling_ratio=ctx.sampling_ratio,
+#             pool_mode=ctx.pool_mode,
+#             aligned=ctx.aligned)
+#         return grad_input, None, None, None, None, None, None
+
+
+# roi_align = RoIAlignFunction.apply
 
 
 class RoIAlign(nn.Module):
@@ -177,7 +177,7 @@ class RoIAlign(nn.Module):
                  sampling_ratio: int = 0,
                  pool_mode: str = 'avg',
                  aligned: bool = True,
-                 use_torchvision: bool = False):
+                 use_torchvision: bool = True):
         super().__init__()
 
         self.output_size = _pair(output_size)
@@ -206,9 +206,9 @@ class RoIAlign(nn.Module):
                                             [0.5 / self.spatial_scale] * 4)
                 return tv_roi_align(input, rois, self.output_size,
                                     self.spatial_scale, self.sampling_ratio)
-        else:
-            return roi_align(input, rois, self.output_size, self.spatial_scale,
-                             self.sampling_ratio, self.pool_mode, self.aligned)
+        # else:
+        #     return roi_align(input, rois, self.output_size, self.spatial_scale,
+        #                      self.sampling_ratio, self.pool_mode, self.aligned)
 
     def __repr__(self):
         s = self.__class__.__name__

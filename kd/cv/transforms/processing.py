@@ -5,11 +5,12 @@ import warnings
 from itertools import product
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple, Union
 
-import mmengine
+from ...engine.utils import is_seq_of, is_list_of, is_tuple_of
 import numpy as np
+from ..image import imnormalize, imresize, impad, imflip, imcrop, imrescale, hsv2bgr
 
-import mmcv
-from mmcv.image.geometric import _scale_size
+# import mmcv
+from ..image.geometric import _scale_size
 from .base import BaseTransform
 from .builder import TRANSFORMS
 from .utils import cache_randomness
@@ -67,7 +68,7 @@ class Normalize(BaseTransform):
             result dict.
         """
 
-        results['img'] = mmcv.imnormalize(results['img'], self.mean, self.std,
+        results['img'] = imnormalize(results['img'], self.mean, self.std,
                                           self.to_rgb)
         results['img_norm_cfg'] = dict(
             mean=self.mean, std=self.std, to_rgb=self.to_rgb)
@@ -169,7 +170,7 @@ class Resize(BaseTransform):
 
         if results.get('img', None) is not None:
             if self.keep_ratio:
-                img, scale_factor = mmcv.imrescale(
+                img, scale_factor = imrescale(
                     results['img'],
                     results['scale'],
                     interpolation=self.interpolation,
@@ -182,7 +183,7 @@ class Resize(BaseTransform):
                 w_scale = new_w / w
                 h_scale = new_h / h
             else:
-                img, w_scale, h_scale = mmcv.imresize(
+                img, w_scale, h_scale = imresize(
                     results['img'],
                     results['scale'],
                     interpolation=self.interpolation,
@@ -209,13 +210,13 @@ class Resize(BaseTransform):
         """Resize semantic segmentation map with ``results['scale']``."""
         if results.get('gt_seg_map', None) is not None:
             if self.keep_ratio:
-                gt_seg = mmcv.imrescale(
+                gt_seg = imrescale(
                     results['gt_seg_map'],
                     results['scale'],
                     interpolation='nearest',
                     backend=self.backend)
             else:
-                gt_seg = mmcv.imresize(
+                gt_seg = imresize(
                     results['gt_seg_map'],
                     results['scale'],
                     interpolation='nearest',
@@ -375,7 +376,7 @@ class Pad(BaseTransform):
             size = self.size[::-1]
         if isinstance(pad_val, int) and results['img'].ndim == 3:
             pad_val = tuple(pad_val for _ in range(results['img'].shape[2]))
-        padded_img = mmcv.impad(
+        padded_img = impad(
             results['img'],
             shape=size,
             pad_val=pad_val,
@@ -395,7 +396,7 @@ class Pad(BaseTransform):
             if isinstance(pad_val, int) and results['gt_seg_map'].ndim == 3:
                 pad_val = tuple(
                     pad_val for _ in range(results['gt_seg_map'].shape[2]))
-            results['gt_seg_map'] = mmcv.impad(
+            results['gt_seg_map'] = impad(
                 results['gt_seg_map'],
                 shape=results['pad_shape'][:2],
                 pad_val=pad_val,
@@ -499,7 +500,7 @@ class CenterCrop(BaseTransform):
             bboxes (np.ndarray): Shape (4, ), location of cropped bboxes.
         """
         if results.get('img', None) is not None:
-            img = mmcv.imcrop(results['img'], bboxes=bboxes)
+            img = imcrop(results['img'], bboxes=bboxes)
             img_shape = img.shape[:2]  # type: ignore
             results['img'] = img
             results['img_shape'] = img_shape
@@ -513,7 +514,7 @@ class CenterCrop(BaseTransform):
             bboxes (np.ndarray): Shape (4, ), location of cropped bboxes.
         """
         if results.get('gt_seg_map', None) is not None:
-            img = mmcv.imcrop(results['gt_seg_map'], bboxes=bboxes)
+            img = imcrop(results['gt_seg_map'], bboxes=bboxes)
             results['gt_seg_map'] = img
 
     def _crop_bboxes(self, results: dict, bboxes: np.ndarray) -> None:
@@ -683,7 +684,7 @@ class RandomGrayscale(BaseTransform):
         img = results['img']
         # convert hsv to bgr
         if self.color_format == 'hsv':
-            img = mmcv.hsv2bgr(img)
+            img = hsv2bgr(img)
         img = img[..., None] if img.ndim == 2 else img
         num_output_channels = img.shape[2]
         if self._random_prob() < self.prob:
@@ -802,7 +803,7 @@ class MultiScaleFlipAug(BaseTransform):
         if scales is not None:
             self.scales = scales if isinstance(scales, list) else [scales]
             self.scale_key = 'scale'
-            assert mmengine.is_list_of(self.scales, tuple)
+            assert is_list_of(self.scales, tuple)
         else:
             # if ``scales`` and ``scale_factor`` both be ``None``
             if scale_factor is None:
@@ -817,7 +818,7 @@ class MultiScaleFlipAug(BaseTransform):
         self.allow_flip = allow_flip
         self.flip_direction = flip_direction if isinstance(
             flip_direction, list) else [flip_direction]
-        assert mmengine.is_list_of(self.flip_direction, str)
+        assert is_list_of(self.flip_direction, str)
         if not self.allow_flip and self.flip_direction != ['horizontal']:
             warnings.warn(
                 'flip_direction has no effect when flip is set to False')
@@ -1063,7 +1064,7 @@ class RandomChoiceResize(BaseTransform):
             self.scales = scales
         else:
             self.scales = [scales]
-        assert mmengine.is_seq_of(self.scales, (tuple, int))
+        assert is_seq_of(self.scales, (tuple, int))
 
         self.resize_cfg = dict(type=resize_type, **resize_kwargs)
         # create a empty Resize object
@@ -1171,7 +1172,7 @@ class RandomFlip(BaseTransform):
                  direction: Union[str, Sequence[Optional[str]]] = 'horizontal',
                  swap_seg_labels: Optional[Sequence] = None) -> None:
         if isinstance(prob, list):
-            assert mmengine.is_list_of(prob, float)
+            assert is_list_of(prob, float)
             assert 0 <= sum(prob) <= 1
         elif isinstance(prob, float):
             assert 0 <= prob <= 1
@@ -1185,7 +1186,7 @@ class RandomFlip(BaseTransform):
         if isinstance(direction, str):
             assert direction in valid_directions
         elif isinstance(direction, list):
-            assert mmengine.is_list_of(direction, str)
+            assert is_list_of(direction, str)
             assert set(direction).issubset(set(valid_directions))
         else:
             raise ValueError(f'direction must be either str or list of str, \
@@ -1275,7 +1276,7 @@ class RandomFlip(BaseTransform):
         Returns:
             numpy.ndarray: Flipped segmentation map.
         """
-        seg_map = mmcv.imflip(seg_map, direction=direction)
+        seg_map = imflip(seg_map, direction=direction)
         if self.swap_seg_labels is not None:
             # to handle datasets with left/right annotations
             # like 'Left-arm' and 'Right-arm' in LIP dataset
@@ -1319,7 +1320,7 @@ class RandomFlip(BaseTransform):
         """Flip images, bounding boxes, semantic segmentation map and
         keypoints."""
         # flip image
-        results['img'] = mmcv.imflip(
+        results['img'] = imflip(
             results['img'], direction=results['flip_direction'])
 
         img_shape = results['img'].shape[:2]
@@ -1482,7 +1483,7 @@ class RandomResize(BaseTransform):
             tuple: The targeted scale of the image to be resized.
         """
 
-        assert mmengine.is_list_of(scales, tuple) and len(scales) == 2
+        assert is_list_of(scales, tuple) and len(scales) == 2
         scale_0 = [scales[0][0], scales[1][0]]
         scale_1 = [scales[0][1], scales[1][1]]
         edge_0 = np.random.randint(min(scale_0), max(scale_0) + 1)
@@ -1524,12 +1525,12 @@ class RandomResize(BaseTransform):
             tuple: The targeted scale of the image to be resized.
         """
 
-        if mmengine.is_tuple_of(self.scale, int):
+        if is_tuple_of(self.scale, int):
             assert self.ratio_range is not None and len(self.ratio_range) == 2
             scale = self._random_sample_ratio(
                 self.scale,  # type: ignore
                 self.ratio_range)
-        elif mmengine.is_seq_of(self.scale, tuple):
+        elif is_seq_of(self.scale, tuple):
             scale = self._random_sample(self.scale)  # type: ignore
         else:
             raise NotImplementedError('Do not support sampling function '

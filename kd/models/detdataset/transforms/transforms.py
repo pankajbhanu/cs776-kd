@@ -5,22 +5,23 @@ import math
 from typing import List, Optional, Sequence, Tuple, Union
 
 import cv2
-import mmcv
+# import mmcv
+from ....cv.image import imflip, hsv2bgr, bgr2hsv
 import numpy as np
-from mmcv.image.geometric import _scale_size
-from mmcv.transforms import BaseTransform
-from mmcv.transforms import Pad as MMCV_Pad
-from mmcv.transforms import RandomFlip as MMCV_RandomFlip
-from mmcv.transforms import Resize as MMCV_Resize
-from mmcv.transforms.utils import avoid_cache_randomness, cache_randomness
-from mmengine.dataset import BaseDataset
-from mmengine.utils import is_str
+from ....cv.image.geometric import _scale_size, imrescale, imresize
+from ....cv.transforms import BaseTransform
+from ....cv.transforms import Pad as MMCV_Pad
+from ....cv.transforms import RandomFlip as MMCV_RandomFlip
+from ....cv.transforms import Resize as MMCV_Resize
+from ....cv.transforms.utils import avoid_cache_randomness, cache_randomness
+from ....engine.dataset import BaseDataset
+from ....engine.utils import is_str
 from numpy import random
 
-from mmdet.registry import TRANSFORMS
-from mmdet.structures.bbox import HorizontalBoxes, autocast_box_type
-from mmdet.structures.mask import BitmapMasks, PolygonMasks
-from mmdet.utils import log_img_scale
+from ...registry import TRANSFORMS
+from ...structures.bbox import HorizontalBoxes, autocast_box_type
+from ...structures.mask.structures import BitmapMasks, PolygonMasks
+from ...detutils import log_img_scale
 
 try:
     from imagecorruptions import corrupt
@@ -110,13 +111,13 @@ class Resize(MMCV_Resize):
         """Resize semantic segmentation map with ``results['scale']``."""
         if results.get('gt_seg_map', None) is not None:
             if self.keep_ratio:
-                gt_seg = mmcv.imrescale(
+                gt_seg = imrescale(
                     results['gt_seg_map'],
                     results['scale'],
                     interpolation='nearest',
                     backend=self.backend)
             else:
-                gt_seg = mmcv.imresize(
+                gt_seg = imresize(
                     results['gt_seg_map'],
                     results['scale'],
                     interpolation='nearest',
@@ -272,13 +273,13 @@ class FixShapeResize(Resize):
             results['scale_factor'] = (scale_factor, scale_factor)
             real_w, real_h = int(w * float(scale_factor) +
                                  0.5), int(h * float(scale_factor) + 0.5)
-            img, scale_factor = mmcv.imrescale(
+            img, scale_factor = imrescale(
                 results['img'], (real_w, real_h),
                 interpolation=self.interpolation,
                 return_scale=True,
                 backend=self.backend)
             # the w_scale and h_scale has minor difference
-            # a real fix should be done in the mmcv.imrescale in the future
+            # a real fix should be done in the imrescale in the future
             results['img'] = img
             results['img_shape'] = img.shape[:2]
             results['keep_ratio'] = self.keep_ratio
@@ -387,7 +388,7 @@ class RandomFlip(MMCV_RandomFlip):
     def _flip(self, results: dict) -> None:
         """Flip images, bounding boxes, and semantic segmentation map."""
         # flip image
-        results['img'] = mmcv.imflip(
+        results['img'] = imflip(
             results['img'], direction=results['flip_direction'])
 
         img_shape = results['img'].shape[:2]
@@ -403,7 +404,7 @@ class RandomFlip(MMCV_RandomFlip):
 
         # flip segs
         if results.get('gt_seg_map', None) is not None:
-            results['gt_seg_map'] = mmcv.imflip(
+            results['gt_seg_map'] = imflip(
                 results['gt_seg_map'], direction=results['flip_direction'])
 
         # record homography matrix for flip
@@ -873,7 +874,7 @@ class SegRescale(BaseTransform):
             dict: Result dict with semantic segmentation map scaled.
         """
         if self.scale_factor != 1:
-            results['gt_seg_map'] = mmcv.imrescale(
+            results['gt_seg_map'] = imrescale(
                 results['gt_seg_map'],
                 self.scale_factor,
                 interpolation='nearest',
@@ -976,7 +977,7 @@ class PhotoMetricDistortion(BaseTransform):
                 img *= alpha_value
 
         # convert color from BGR to HSV
-        img = mmcv.bgr2hsv(img)
+        img = bgr2hsv(img)
 
         # random saturation
         if saturation_flag:
@@ -993,7 +994,7 @@ class PhotoMetricDistortion(BaseTransform):
             img[..., 0][img[..., 0] < 0] += 360
 
         # convert color from HSV to BGR
-        img = mmcv.hsv2bgr(img)
+        img = hsv2bgr(img)
 
         # random contrast
         if mode == 0:
@@ -2202,7 +2203,7 @@ class Mosaic(BaseTransform):
             # keep_ratio resize
             scale_ratio_i = min(self.img_scale[1] / h_i,
                                 self.img_scale[0] / w_i)
-            img_i = mmcv.imresize(
+            img_i = imresize(
                 img_i, (int(w_i * scale_ratio_i), int(h_i * scale_ratio_i)))
 
             # compute the combine parameters
@@ -2453,7 +2454,7 @@ class MixUp(BaseTransform):
         # 1. keep_ratio resize
         scale_ratio = min(self.dynamic_scale[1] / retrieve_img.shape[0],
                           self.dynamic_scale[0] / retrieve_img.shape[1])
-        retrieve_img = mmcv.imresize(
+        retrieve_img = imresize(
             retrieve_img, (int(retrieve_img.shape[1] * scale_ratio),
                            int(retrieve_img.shape[0] * scale_ratio)))
 
@@ -2462,7 +2463,7 @@ class MixUp(BaseTransform):
 
         # 3. scale jit
         scale_ratio *= jit_factor
-        out_img = mmcv.imresize(out_img, (int(out_img.shape[1] * jit_factor),
+        out_img = imresize(out_img, (int(out_img.shape[1] * jit_factor),
                                           int(out_img.shape[0] * jit_factor)))
 
         # 4. flip
@@ -3282,7 +3283,7 @@ class CachedMosaic(Mosaic):
             # keep_ratio resize
             scale_ratio_i = min(self.img_scale[1] / h_i,
                                 self.img_scale[0] / w_i)
-            img_i = mmcv.imresize(
+            img_i = imresize(
                 img_i, (int(w_i * scale_ratio_i), int(h_i * scale_ratio_i)))
 
             # compute the combine parameters
@@ -3524,7 +3525,7 @@ class CachedMixUp(BaseTransform):
         # 1. keep_ratio resize
         scale_ratio = min(self.dynamic_scale[1] / retrieve_img.shape[0],
                           self.dynamic_scale[0] / retrieve_img.shape[1])
-        retrieve_img = mmcv.imresize(
+        retrieve_img = imresize(
             retrieve_img, (int(retrieve_img.shape[1] * scale_ratio),
                            int(retrieve_img.shape[0] * scale_ratio)))
 
@@ -3533,7 +3534,7 @@ class CachedMixUp(BaseTransform):
 
         # 3. scale jit
         scale_ratio *= jit_factor
-        out_img = mmcv.imresize(out_img, (int(out_img.shape[1] * jit_factor),
+        out_img = imresize(out_img, (int(out_img.shape[1] * jit_factor),
                                           int(out_img.shape[0] * jit_factor)))
 
         # 4. flip

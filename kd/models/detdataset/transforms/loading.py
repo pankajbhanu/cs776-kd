@@ -1,20 +1,20 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 from typing import Optional, Tuple, Union
 
-import mmcv
 import numpy as np
 import pycocotools.mask as maskUtils
 import torch
-from mmcv.transforms import BaseTransform
-from mmcv.transforms import LoadAnnotations as MMCV_LoadAnnotations
-from mmcv.transforms import LoadImageFromFile
-from mmengine.fileio import FileClient
-from mmengine.structures import BaseDataElement
+from ....cv.transforms import BaseTransform
+from ....cv.transforms import LoadAnnotations as MMCV_LoadAnnotations
+from ....cv.transforms import LoadImageFromFile
+from ....cv.image import imfrombytes
+from ....engine.fileio import FileClient
+from ....engine.structures import BaseDataElement
 
-from mmdet.registry import TRANSFORMS
-from mmdet.structures.bbox import get_box_type
-from mmdet.structures.bbox.box_type import autocast_box_type
-from mmdet.structures.mask import BitmapMasks, PolygonMasks
+from ...registry import TRANSFORMS
+from ...structures.bbox import get_box_type
+from ...structures.bbox.box_type import autocast_box_type
+from ...structures.mask.structures import BitmapMasks, PolygonMasks
 
 
 @TRANSFORMS.register_module()
@@ -122,7 +122,7 @@ class LoadMultiChannelImageFromFiles(BaseTransform):
         for name in results['img_path']:
             img_bytes = self.file_client.get(name)
             img.append(
-                mmcv.imfrombytes(
+                imfrombytes(
                     img_bytes,
                     flag=self.color_type,
                     backend=self.imdecode_backend))
@@ -551,7 +551,7 @@ class LoadPanopticAnnotations(LoadAnnotations):
             return
 
         img_bytes = self.file_client.get(results['seg_map_path'])
-        pan_png = mmcv.imfrombytes(
+        pan_png = imfrombytes(
             img_bytes, flag='color', channel_order='rgb').squeeze()
         pan_png = self.rgb2id(pan_png)
 

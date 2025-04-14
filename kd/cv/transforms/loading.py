@@ -2,10 +2,11 @@
 import warnings
 from typing import Optional
 
-import mmengine.fileio as fileio
+from ...engine import fileio
 import numpy as np
 
-import mmcv
+# import mmcv
+from ..image import imfrombytes
 from .base import BaseTransform
 from .builder import TRANSFORMS
 
@@ -98,7 +99,7 @@ class LoadImageFromFile(BaseTransform):
             else:
                 img_bytes = fileio.get(
                     filename, backend_args=self.backend_args)
-            img = mmcv.imfrombytes(
+            img = imfrombytes(
                 img_bytes, flag=self.color_type, backend=self.imdecode_backend)
         except Exception as e:
             if self.ignore_empty:
@@ -305,7 +306,7 @@ class LoadAnnotations(BaseTransform):
             img_bytes = fileio.get(
                 results['seg_map_path'], backend_args=self.backend_args)
 
-        results['gt_seg_map'] = mmcv.imfrombytes(
+        results['gt_seg_map'] = imfrombytes(
             img_bytes, flag='unchanged',
             backend=self.imdecode_backend).squeeze()
 

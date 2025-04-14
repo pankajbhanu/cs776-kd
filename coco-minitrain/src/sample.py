@@ -109,10 +109,14 @@ def generate_proportional_coco_subset(full_coco_annotation_file, output_annotati
 
 if __name__ == '__main__':
     # Example usage:
-    full_annotation_file = '/Users/junth/temp/coco-minitrain/src/data/coco/annotations/instances_train2017.json'
-    full_image_directory = '/Users/junth/temp/coco-minitrain/src/data/coco/train2017'
-    output_annotation_path = '/Users/junth/temp/coco-minitrain/src/sample_data/coco/annotations/instances_train2017.json'
-    output_image_directory = '/Users/junth/temp/coco-minitrain/src/sample_data/coco/train2017'
+    # full_annotation_file = '/Users/junth/temp/coco-minitrain/src/data/coco/annotations/instances_train2017.json'
+    # full_image_directory = '/Users/junth/temp/coco-minitrain/src/data/coco/train2017'
+    # output_annotation_path = '/Users/junth/temp/coco-minitrain/src/sample_data/coco/annotations/instances_train2017.json'
+    # output_image_directory = '/Users/junth/temp/coco-minitrain/src/sample_data/coco/train2017'
+    full_annotation_file = '/home/pankaj/Downloads/cs776/proj/tools/dataset/instances_minitrain2017.json'
+    full_image_directory = '/home/pankaj/Downloads/cs776/proj/tools/dataset/coco_minitrain2017_25k/images'
+    output_annotation_path = '/home/pankaj/Downloads/cs776/proj/tools/dataset/sample_mini/sample_instances_train2017.json'
+    output_image_directory = '/home/pankaj/Downloads/cs776/proj/tools/dataset/sample_mini/sample_train2017'
     num_desired_images = 1000  # Specify the desired number of images in the subset
 
     generate_proportional_coco_subset(full_annotation_file, output_annotation_path, output_image_directory, num_desired_images, full_image_directory)

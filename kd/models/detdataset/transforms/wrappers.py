@@ -3,10 +3,10 @@ import copy
 from typing import Callable, Dict, List, Optional, Union
 
 import numpy as np
-from mmcv.transforms import BaseTransform, Compose
-from mmcv.transforms.utils import cache_random_params, cache_randomness
+from ....cv.transforms import BaseTransform, Compose
+from ....cv.transforms.utils import cache_random_params, cache_randomness
 
-from mmdet.registry import TRANSFORMS
+from ...registry import TRANSFORMS
 
 
 @TRANSFORMS.register_module()

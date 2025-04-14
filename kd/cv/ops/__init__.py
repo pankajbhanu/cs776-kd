@@ -22,8 +22,8 @@ from .bbox import bbox_overlaps
 # from .deprecated_wrappers import MaxPool2d_deprecated as MaxPool2d
 # from .diff_iou_rotated import diff_iou_rotated_2d, diff_iou_rotated_3d
 # from .filtered_lrelu import filtered_lrelu
-from .focal_loss import (SigmoidFocalLoss, SoftmaxFocalLoss,
-                         sigmoid_focal_loss, softmax_focal_loss)
+# from .focal_loss import (SigmoidFocalLoss, SoftmaxFocalLoss,
+#                          sigmoid_focal_loss, softmax_focal_loss)
 # from .furthest_point_sample import (furthest_point_sample,
 #                                     furthest_point_sample_with_dist)
 # from .fused_bias_leakyrelu import FusedBiasLeakyReLU, fused_bias_leakyrelu

@@ -2,7 +2,8 @@
 
 from typing import Any, Callable, Dict, List, Optional, Sequence, Union
 
-import mmengine
+# import mmengine
+from ...engine.utils import is_seq_of
 import numpy as np
 
 from .base import BaseTransform
@@ -570,7 +571,7 @@ class RandomChoice(BaseTransform):
         super().__init__()
 
         if prob is not None:
-            assert mmengine.is_seq_of(prob, float)
+            assert is_seq_of(prob, float)
             assert len(transforms) == len(prob), \
                 '``transforms`` and ``prob`` must have same lengths. ' \
                 f'Got {len(transforms)} vs {len(prob)}.'

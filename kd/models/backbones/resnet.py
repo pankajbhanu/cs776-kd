@@ -37,7 +37,6 @@ class BasicBlock(BaseModule):
             padding=dilation,
             dilation=dilation,
             bias=False)
-        print(dir(norm1))
         self.add_module(self.norm1_name, norm1)
         self.conv2 = nn.Conv2d(planes, planes, 3, padding=1, bias=False)
         self.add_module(self.norm2_name, norm2)
@@ -555,9 +554,9 @@ class ResNet(BaseModule):
         """Convert the model into training mode while keep normalization layer
         freezed."""
         super(ResNet, self).train(mode)
-        self._freeze_stages()
-        if mode and self.norm_eval:
-            for m in self.modules():
-                # trick: eval have effect on BatchNorm only
-                if isinstance(m, _BatchNorm):
-                    m.eval()
+        # self._freeze_stages()
+        # if mode and self.norm_eval:
+        #     for m in self.modules():
+        #         # trick: eval have effect on BatchNorm only
+        #         if isinstance(m, _BatchNorm):
+        #             m.eval()

@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 from typing import Sequence, Union
 
-import mmengine
+# import mmengine
 import numpy as np
 import torch
 

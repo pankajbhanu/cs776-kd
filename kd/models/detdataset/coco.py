@@ -3,7 +3,7 @@ import copy
 import os.path as osp
 from typing import List, Union
 
-from mmdet.registry import DATASETS
+from ..registry import DATASETS
 from .api_wrappers import COCO
 from .base_det_dataset import BaseDetDataset
 

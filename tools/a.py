@@ -8,9 +8,9 @@ https://mmengine.readthedocs.io/en/latest/advanced_tutorials/basedataset.html
 """
 
 
-from mmdet.datasets.coco import CocoDataset
-from mmcv.transforms import LoadImageFromFile, LoadAnnotations, Resize, RandomFlip
-from mmdet.datasets.transforms import PackDetInputs
+from kd.models.detdataset.coco import CocoDataset
+from kd.cv.transforms import LoadImageFromFile, LoadAnnotations, Resize, RandomFlip
+from kd.models.detdataset.transforms import PackDetInputs
 
 
 """
@@ -31,7 +31,7 @@ train_pipeline = [
 """
 ---------------1. dataset
 """
-data_root = 'data/coco/'
+data_root = 'tools/dataset/sample_mini'
 file_client_args = dict(backend='disk')
 
 train_pipeline = [
@@ -44,9 +44,9 @@ train_pipeline = [
 
 
 train_dataset = CocoDataset(
-    ann_file='annotations/instances_train2017.json',
+    ann_file='sample_instances_train2017.json',
     data_root = data_root,
-    data_prefix=dict(img='train2017/'),
+    data_prefix=dict(img='sample_train2017/'),
     filter_cfg=dict(filter_empty_gt=True, min_size=32),
     pipeline=train_pipeline
 )
