@@ -7,8 +7,8 @@ import torch.nn.functional as F
 from ....engine.structures import InstanceData
 from torch import Tensor
 
-from mmdet.registry import TASK_UTILS
-from mmdet.structures.bbox import bbox_overlaps, bbox_xyxy_to_cxcywh
+from ...registry import TASK_UTILS
+from ...structures.bbox import bbox_overlaps, bbox_xyxy_to_cxcywh
 
 
 class BaseMatchCost:

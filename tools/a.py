@@ -31,7 +31,7 @@ train_pipeline = [
 """
 ---------------1. dataset
 """
-data_root = 'tools/dataset/sample_mini'
+data_root = 'dataset/sample_mini'
 file_client_args = dict(backend='disk')
 
 train_pipeline = [
@@ -94,7 +94,7 @@ inputs = batch['inputs']
 data_samples = batch['data_samples']
 
 # print(batch)
-# print(inputs[0])  
+# print(inputs[0])
 # print(data_samples[0])
 # print(type(batch))
 # print(type(inputs))
@@ -118,13 +118,13 @@ data_preprocessor = DetDataPreprocessor(
         mean=[123.675, 116.28, 103.53],
         std=[58.395, 57.12, 57.375],
         bgr_to_rgb=True,
-        pad_size_divisor=32    
+        pad_size_divisor=32
     )
 
 # print(data_preprocessor)
 # print(type(data_preprocessor))
 
-        
+
 
 data_pre = data_preprocessor(batch)
 # print(data_pre)
@@ -358,7 +358,7 @@ train_pipeline = [
 """
 ---------------1. dataset
 """
-data_root = 'data/coco/'
+data_root = 'datataset/coco25k/'
 file_client_args = dict(backend='disk')
 
 train_pipeline = [
@@ -371,9 +371,9 @@ train_pipeline = [
 
 
 train_dataset = CocoDataset(
-    ann_file='annotations/instances_train2017.json',
+    ann_file='instances_train2017.json',
     data_root = data_root,
-    data_prefix=dict(img='train2017/'),
+    data_prefix=dict(img='images/'),
     filter_cfg=dict(filter_empty_gt=True, min_size=32),
     pipeline=train_pipeline
 )
@@ -421,7 +421,7 @@ inputs = batch['inputs']
 data_samples = batch['data_samples']
 
 # print(batch)
-# print(inputs[0])  
+# print(inputs[0])
 # print(data_samples[0])
 # print(type(batch))
 # print(type(inputs))
@@ -445,13 +445,13 @@ data_preprocessor = DetDataPreprocessor(
         mean=[123.675, 116.28, 103.53],
         std=[58.395, 57.12, 57.375],
         bgr_to_rgb=True,
-        pad_size_divisor=32    
+        pad_size_divisor=32
     )
 
 # print(data_preprocessor)
 # print(type(data_preprocessor))
 
-        
+
 
 data_pre = data_preprocessor(batch)
 # print(data_pre)

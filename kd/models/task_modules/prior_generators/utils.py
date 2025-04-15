@@ -4,7 +4,7 @@ from typing import Optional, Tuple
 import torch
 from torch import Tensor
 
-from mmdet.structures.bbox import BaseBoxes
+from ...structures.bbox import BaseBoxes
 
 
 def anchor_inside_flags(flat_anchors: Tensor,

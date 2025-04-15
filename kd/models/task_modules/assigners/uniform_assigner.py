@@ -4,9 +4,9 @@ from typing import Optional
 import torch
 from ....engine.structures import InstanceData
 
-from mmdet.registry import TASK_UTILS
-from mmdet.structures.bbox import bbox_xyxy_to_cxcywh
-from mmdet.utils import ConfigType
+from ...registry import TASK_UTILS
+from ...structures.bbox import bbox_xyxy_to_cxcywh
+from ...detutils import ConfigType
 from .assign_result import AssignResult
 from .base_assigner import BaseAssigner
 

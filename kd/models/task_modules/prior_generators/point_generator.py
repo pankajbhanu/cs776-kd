@@ -6,7 +6,7 @@ import torch
 from torch import Tensor
 from torch.nn.modules.utils import _pair
 
-from mmdet.registry import TASK_UTILS
+from ...registry import TASK_UTILS
 
 DeviceType = Union[str, torch.device]
 

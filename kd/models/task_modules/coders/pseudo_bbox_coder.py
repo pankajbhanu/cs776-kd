@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-from mmdet.registry import TASK_UTILS
-from mmdet.structures.bbox import HorizontalBoxes, get_box_tensor
+from kd.models.registry import TASK_UTILS
+from kd.models.structures.bbox import HorizontalBoxes, get_box_tensor
 from .base_bbox_coder import BaseBBoxCoder
 
 

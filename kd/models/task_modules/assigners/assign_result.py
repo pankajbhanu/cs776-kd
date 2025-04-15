@@ -2,7 +2,7 @@
 import torch
 from torch import Tensor
 
-from mmdet.utils import util_mixins
+from ...detutils import util_mixins
 
 
 class AssignResult(util_mixins.NiceRepr):
