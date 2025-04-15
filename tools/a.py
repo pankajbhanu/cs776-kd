@@ -1,8 +1,3 @@
-# from kd.engine.dataset import CocoDataset
-# from kd.cv.transforms.loading import LoadImageFromFile, LoadAnnotations
-# from kd.cv.transforms.processing import Resize, RandomFlip
-# from kd.models.
-
 """
 https://mmengine.readthedocs.io/en/latest/advanced_tutorials/basedataset.html
 """
@@ -12,22 +7,17 @@ from kd.models.detdataset.coco import CocoDataset
 from kd.cv.transforms import LoadImageFromFile, LoadAnnotations, Resize, RandomFlip
 from kd.models.detdataset.transforms import PackDetInputs
 
+import torch
+from torch.utils.data import DataLoader
+from kd.engine.dataset import DefaultSampler, pseudo_collate
 
-"""
-AttributeError: 'CocoDataset' object has no attribute 'file_client'
-"""
-
-
-"""
-train_pipeline = [
-    dict(type='LoadImageFromFile', file_client_args=file_client_args),
-    dict(type='LoadAnnotations', with_bbox=True),
-    dict(type='Resize', scale=(1333, 800), keep_ratio=True),
-    dict(type='RandomFlip', prob=0.5),
-    dict(type='PackDetInputs')
-]
-"""
-
+from kd.models.data_preprocessors.data_preprocessor import DetDataPreprocessor
+from kd.models.backbones import ResNet
+from kd.models.necks import FPN
+from kd.models.task_modules.prior_generators import AnchorGenerator
+from kd.models.task_modules.coders import DeltaXYWHBBoxCoder
+from kd.models.losses import FocalLoss, L1Loss, GIoULoss, KDQualityFocalLoss
+from kd.models.dense_heads import RetinaHead
 """
 ---------------1. dataset
 """
@@ -59,17 +49,7 @@ train_dataset = CocoDataset(
 --------------2. data loader
 """
 
-import torch
-from torch.utils.data import DataLoader
-# from mmengine.dataset import DefaultSampler, pseudo_collate, default_collate
-
-from kd.engine.dataset import DefaultSampler, pseudo_collate
-
-
-
 sampler = DefaultSampler(train_dataset, shuffle=True)
-
-
 
 train_dataloader = DataLoader(
     dataset=train_dataset,
@@ -102,13 +82,10 @@ data_samples = batch['data_samples']
 # print(type(data_samples))
 
 
-
-
 """
 -------------------3. Det Preprocessor
 """
 
-from kd.models.data_preprocessors.data_preprocessor import DetDataPreprocessor
 
 # from mmdet.models import DetDataPreprocessor
 
@@ -148,7 +125,6 @@ print(inputs.shape)                 # (5, 3, 1216, 1248])   B N H W
 4. backbone (teacher)
 
 """
-from kd.models.backbones import ResNet
 
 
 teacher_resnet = ResNet(
@@ -174,7 +150,6 @@ x = teacher_resnet(inputs)
 """
 
 
-from kd.models.necks import FPN
 
 teacher_neck = FPN(
     in_channels=[256, 512, 1024, 2048],
@@ -222,8 +197,6 @@ a,b,c,d,e = x
 6. anchor generation and bbox coder
 """
 
-from kd.models.task_modules.prior_generators import AnchorGenerator
-from kd.models.task_modules.coders import DeltaXYWHBBoxCoder
 
 
 teacher_anchor_generator = AnchorGenerator(
@@ -249,7 +222,6 @@ print(teacher_bbox_coder)
 7. loss
 """
 
-from kd.models.losses import FocalLoss, L1Loss, GIoULoss, KDQualityFocalLoss
 
 
 teacher_loss_cls = FocalLoss(
@@ -295,7 +267,6 @@ bbox_head=dict(
         loss_bbox=dict(type='L1Loss', loss_weight=1.0)),
 """
 
-from kd.models.dense_heads import RetinaHead
 
 teacher_bbox_head = RetinaHead(
     anchor_generator=teacher_anchor_generator,
@@ -311,7 +282,7 @@ print(teacher_bbox_head)
 # print(teacher_bbox_head(a))
 
 
-print(dir(teacher_bbox_head))
+# print(dir(teacher_bbox_head))
 
 print(teacher_bbox_head.loss_cls)
 print(teacher_bbox_head.loss_bbox)
@@ -332,14 +303,6 @@ student
 
 
 
-
-
-
-from mmdet.datasets.coco import CocoDataset
-from mmcv.transforms import LoadImageFromFile, LoadAnnotations, Resize, RandomFlip
-from mmdet.datasets.transforms import PackDetInputs
-
-
 """
 AttributeError: 'CocoDataset' object has no attribute 'file_client'
 """
@@ -358,7 +321,7 @@ train_pipeline = [
 """
 ---------------1. dataset
 """
-data_root = 'datataset/coco25k/'
+data_root = 'dataset/sample_mini/'
 file_client_args = dict(backend='disk')
 
 train_pipeline = [
@@ -371,9 +334,9 @@ train_pipeline = [
 
 
 train_dataset = CocoDataset(
-    ann_file='instances_train2017.json',
+    ann_file='sample_instances_train2017.json',
     data_root = data_root,
-    data_prefix=dict(img='images/'),
+    data_prefix=dict(img='sample_train2017/'),
     filter_cfg=dict(filter_empty_gt=True, min_size=32),
     pipeline=train_pipeline
 )
@@ -385,12 +348,6 @@ train_dataset = CocoDataset(
 """
 --------------2. data loader
 """
-
-import torch
-from torch.utils.data import DataLoader
-# from mmengine.dataset import DefaultSampler, pseudo_collate, default_collate
-
-from kd.engine.dataset import DefaultSampler, pseudo_collate
 
 
 
@@ -435,10 +392,6 @@ data_samples = batch['data_samples']
 -------------------3. Det Preprocessor
 """
 
-from kd.models.data_preprocessors.data_preprocessor import DetDataPreprocessor
-
-# from mmdet.models import DetDataPreprocessor
-
 
 
 data_preprocessor = DetDataPreprocessor(
@@ -475,8 +428,6 @@ print(inputs.shape)                 # (5, 3, 1216, 1248])   B N H W
 4. backbone (teacher)
 
 """
-from kd.models.backbones import ResNet
-
 
 student_resnet = ResNet(
     depth=18,
@@ -508,8 +459,6 @@ x = student_resnet(inputs)
 
 """
 
-
-from kd.models.necks import FPN
 
 student_neck = FPN(
     in_channels=[64, 128, 256, 512],
@@ -557,9 +506,6 @@ a,b,c,d,e = x
 6. anchor generation and bbox coder
 """
 
-from kd.models.task_modules.prior_generators import AnchorGenerator
-from kd.models.task_modules.coders import DeltaXYWHBBoxCoder
-
 
 student_anchor_generator = AnchorGenerator(
         octave_base_scale=4,
@@ -583,8 +529,6 @@ print(student_bbox_coder)
 """
 7. loss
 """
-
-from kd.models.losses import FocalLoss, L1Loss, GIoULoss, KDQualityFocalLoss
 
 
 student_loss_cls = FocalLoss(
@@ -628,8 +572,6 @@ bbox_head=dict(
         loss_bbox=dict(type='L1Loss', loss_weight=1.0)),
 """
 
-from kd.models.dense_heads import RetinaHead
-
 student_bbox_head = RetinaHead(
     anchor_generator=teacher_anchor_generator,
     bbox_coder=teacher_bbox_coder,
@@ -645,3 +587,14 @@ print(student_bbox_head)
 
 # print(data_samples[0])
 
+loss_cls_kd = KDQualityFocalLoss(beta=1, loss_weight=1.0)
+loss_reg_kd = GIoULoss(loss_weight=1.0)
+reused_teacher_head_index = 3
+student_assigner = MaxIoUAssigner(use_sigmoid=True, gamma=2.0, alpha=0.25, loss_weight=1.0)
+syudent_sampler = PseudoSampler()
+student_nms = NMSop(iou_threshold=0.5)
+optim_wrapper = OptimWrapper(
+    optimizer=SGD(lr=0.01, momentum=0.9, weight_decay=0.0001)
+)
+checkpoint_hook = CheckpointHook(interval=12)
+logger_hook = LoggerHook
