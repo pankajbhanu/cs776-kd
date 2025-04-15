@@ -9,10 +9,10 @@ from ...engine.config import Config
 from ...engine.runner import load_checkpoint
 from torch import Tensor
 
-from mmdet.registry import MODELS
+from ..registry import MODELS
 from ..structures import SampleList
 from ..structures.bbox import cat_boxes
-from mmdet.utils import (ConfigType, InstanceList, OptConfigType,
+from ..detutils import (ConfigType, InstanceList, OptConfigType,
                          OptInstanceList, reduce_mean)
 from ..utils import images_to_levels, multi_apply, unpack_gt_instances
 from .single_stage_detector import SingleStageDetector
