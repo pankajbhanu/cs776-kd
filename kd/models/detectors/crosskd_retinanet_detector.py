@@ -18,7 +18,7 @@ from .utils import (
 )
 
 # @MODELS.register_module()
-class CrossKDRetinaNet(CrossKDSingleStageDetector):
+class CrossKDRetinaNetDetector(CrossKDSingleStageDetector):
 
     """
     teacher: models -> detectors -> retinanet

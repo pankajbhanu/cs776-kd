@@ -1,3 +1,3 @@
-from .crosskd_retinanet import CrossKDRetinaNet
+from .crosskd_retinanet_detector import CrossKDRetinaNetDetector
 
-__all__ = ['CrossKDRetinaNet']
+__all__ = ['CrossKDRetinaNetDetector']

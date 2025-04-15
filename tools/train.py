@@ -2,7 +2,7 @@ from kd.config.common.optim import SGD
 from kd.engine.runner import Runner
 from kd.models.cvops.nms import NMSop
 from kd.models.data_preprocessors.data_preprocessor import DetDataPreprocessor
-from kd.models.detectors import CrossKDRetinaNet
+from kd.models.detectors import CrossKDRetinaNetDetector
 from kd.models.backbones import ResNet
 from kd.models.necks import FPN
 from kd.models.dense_heads import RetinaHead
@@ -200,7 +200,7 @@ test_pipeline = [
         loss_bbox=student_loss_bbox,
     )
     teacher_ckpt = 'https://download.openmmlab.com/mmdetection/v2.0/retinanet/retinanet_r50_fpn_1x_coco/retinanet_r50_fpn_1x_coco_20200130-c2398f9e.pth'
-    detector = CrossKDRetinaNet(
+    detector = CrossKDRetinaNetDetector(
         backbone=student_resnet,
         neck=student_neck,
         bbox_head=student_bbox_head,

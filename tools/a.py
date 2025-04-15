@@ -7,7 +7,6 @@ from kd.models.detdataset.coco import CocoDataset
 from kd.cv.transforms import LoadImageFromFile, LoadAnnotations, Resize, RandomFlip
 from kd.models.detdataset.transforms import PackDetInputs
 
-import torch
 from torch.utils.data import DataLoader
 from kd.engine.dataset import DefaultSampler, pseudo_collate
 
