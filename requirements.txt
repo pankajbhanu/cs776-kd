@@ -3,6 +3,7 @@ contourpy==1.3.1
 -e git+ssh://git@github.com/pankajbhanu/cs776-kd.git@1c9d75baffe039ea684460147fcf79e41135246f#egg=cs776kd
 cycler==0.12.1
 filelock==3.18.0
+filprofiler==2024.11.2
 fonttools==4.57.0
 fsspec==2025.3.2
 Jinja2==3.1.6
