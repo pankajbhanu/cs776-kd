@@ -28,13 +28,11 @@ class SingleStageDetector(BaseDetector):
             backbone: ResNet,
             neck: FPN,
             bbox_head: RetinaHead,
-            assigner: MaxIoUAssigner,
-            sampler: PseudoSampler,
             data_preprocessor: DetDataPreprocessor,
             train_cfg: dict,
             test_cfg: dict,
             checkpoint: str = "",
-            init_cfg: OptMultiConfig = None
+            # init_cfg: OptMultiConfig = None
             )-> None:
         super().__init__(
             data_preprocessor=data_preprocessor,
@@ -55,29 +53,30 @@ class SingleStageDetector(BaseDetector):
         self.train_cfg = train_cfg
         self.test_cfg = test_cfg
 
-    # def _load_from_state_dict(self, state_dict: dict, prefix: str,
-    #                           local_metadata: dict, strict: bool,
-    #                           missing_keys: Union[List[str], str],
-    #                           unexpected_keys: Union[List[str], str],
-    #                           error_msgs: Union[List[str], str]) -> None:
-    #     """Exchange bbox_head key to rpn_head key when loading two-stage
-    #     weights into single-stage model."""
-    #     bbox_head_prefix = prefix + '.bbox_head' if prefix else 'bbox_head'
-    #     bbox_head_keys = [
-    #         k for k in state_dict.keys() if k.startswith(bbox_head_prefix)
-    #     ]
-    #     rpn_head_prefix = prefix + '.rpn_head' if prefix else 'rpn_head'
-    #     rpn_head_keys = [
-    #         k for k in state_dict.keys() if k.startswith(rpn_head_prefix)
-    #     ]
-    #     if len(bbox_head_keys) == 0 and len(rpn_head_keys) != 0:
-    #         for rpn_head_key in rpn_head_keys:
-    #             bbox_head_key = bbox_head_prefix + \
-    #                             rpn_head_key[len(rpn_head_prefix):]
-    #             state_dict[bbox_head_key] = state_dict.pop(rpn_head_key)
-    #     super()._load_from_state_dict(state_dict, prefix, local_metadata,
-    #                                   strict, missing_keys, unexpected_keys,
-    #                                   error_msgs)
+
+    def _load_from_state_dict(self, state_dict: dict, prefix: str,
+                              local_metadata: dict, strict: bool,
+                              missing_keys: Union[List[str], str],
+                              unexpected_keys: Union[List[str], str],
+                              error_msgs: Union[List[str], str]) -> None:
+        """Exchange bbox_head key to rpn_head key when loading two-stage
+        weights into single-stage model."""
+        bbox_head_prefix = prefix + '.bbox_head' if prefix else 'bbox_head'
+        bbox_head_keys = [
+            k for k in state_dict.keys() if k.startswith(bbox_head_prefix)
+        ]
+        rpn_head_prefix = prefix + '.rpn_head' if prefix else 'rpn_head'
+        rpn_head_keys = [
+            k for k in state_dict.keys() if k.startswith(rpn_head_prefix)
+        ]
+        if len(bbox_head_keys) == 0 and len(rpn_head_keys) != 0:
+            for rpn_head_key in rpn_head_keys:
+                bbox_head_key = bbox_head_prefix + \
+                                rpn_head_key[len(rpn_head_prefix):]
+                state_dict[bbox_head_key] = state_dict.pop(rpn_head_key)
+        super()._load_from_state_dict(state_dict, prefix, local_metadata,
+                                      strict, missing_keys, unexpected_keys,
+                                      error_msgs)
 
     def loss(self, batch_inputs: Tensor,
              batch_data_samples: SampleList,
@@ -130,6 +129,7 @@ class SingleStageDetector(BaseDetector):
                     the last dimension 4 arrange as (x1, y1, x2, y2).
         """
         x = self.extract_feat(batch_inputs)
+        print(self.test_cfg)
         results_list = self.bbox_head.predict(
             x, batch_data_samples, rescale=rescale)
         batch_data_samples = self.add_pred_to_datasample(

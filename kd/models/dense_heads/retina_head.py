@@ -1,7 +1,9 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch.nn as nn
 
+from kd.models.task_modules.assigners import MaxIoUAssigner
 from kd.models.task_modules.prior_generators.anchor_generator import AnchorGenerator
+from kd.models.task_modules.samplers.pseudo_sampler import PseudoSampler
 from .anchor_head import AnchorHead
 
 
@@ -28,6 +30,8 @@ class RetinaHead(AnchorHead):
                  num_classes,
                  in_channels,
                  anchor_generator: AnchorGenerator,
+                 assigner:MaxIoUAssigner,
+                 sampler: PseudoSampler,
                  stacked_convs=4,
                  conv_cfg=None,
                  norm_cfg=None,
@@ -40,6 +44,7 @@ class RetinaHead(AnchorHead):
                          name='retina_cls',
                          std=0.01,
                          bias_prob=0.01)),
+                 
                  **kwargs):
         assert stacked_convs >= 0, \
             '`stacked_convs` must be non-negative integers, ' \
@@ -51,6 +56,8 @@ class RetinaHead(AnchorHead):
             num_classes,
             in_channels,
             anchor_generator=anchor_generator,
+            assigner=assigner,
+            sampler=sampler,
             **kwargs)
 
     def _init_layers(self):

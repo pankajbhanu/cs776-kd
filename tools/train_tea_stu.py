@@ -1,4 +1,5 @@
 from os import pread
+from kd.engine.runner.checkpoint import load_checkpoint
 from kd.models.detdataset.coco import CocoDataset
 from kd.cv.transforms import LoadImageFromFile, LoadAnnotations, Resize, RandomFlip
 from kd.models.detdataset.transforms import PackDetInputs
@@ -12,6 +13,7 @@ from kd.models.detectors.crosskd_retinanet_detector import CrossKDRetinaNetDetec
 from kd.models.detectors.single_stage_detector import SingleStageDetector
 from kd.models.detectors.retinanet import RetinaNet
 from kd.models.necks import FPN
+from kd.models.task_modules.assigners.iou2d_calculator import BboxOverlaps2D
 from kd.models.task_modules.assigners.max_iou_assigner import MaxIoUAssigner
 from kd.models.task_modules.prior_generators import AnchorGenerator
 from kd.models.task_modules.coders import DeltaXYWHBBoxCoder
@@ -266,7 +268,16 @@ bbox_head=dict(
             loss_weight=1.0),
         loss_bbox=dict(type='L1Loss', loss_weight=1.0)),
 """
+bbox_overlap = BboxOverlaps2D(scale=1)
 
+
+teacher_assigner = MaxIoUAssigner(
+    pos_iou_thr=0.5,
+    neg_iou_thr=0.4,
+    min_pos_iou=0,
+    ignore_iof_thr=-1,
+    iou_calculator=bbox_overlap
+)
 
 teacher_bbox_head = RetinaHead(
     anchor_generator=teacher_anchor_generator,
@@ -277,33 +288,36 @@ teacher_bbox_head = RetinaHead(
     in_channels=256,
     stacked_convs=4,
     feat_channels=256,
+    assigner=teacher_assigner,
+    sampler=PseudoSampler(),
 )
 
-teacher_assigner = MaxIoUAssigner(
-    pos_iou_thr=0.5,
-    neg_iou_thr=0.4,
-    min_pos_iou=0,
-    ignore_iof_thr=-1
-)
 
+teacher_checkpoint = "dataset/retinanet_r50_fpn_1x_coco_20200130-c2398f9e.pth"
 
 teacher_retinanet = RetinaNet(
     backbone=teacher_resnet,
     neck=teacher_neck,
     bbox_head=teacher_bbox_head,
     data_preprocessor=data_preprocessor,
-    checkpoint="",
-    assigner=teacher_assigner,
-    sampler=PseudoSampler(),
     train_cfg=dict(
         allowed_border=-1,
         pos_weight=-1,
         debug=False
     ),
     test_cfg=dict(
-       nms_pre=1000,
-      min_bbox_size=0,
-     score_thr=0.05,
-    max_per_img=100
+        nms_pre=1000,
+        min_bbox_size=0,
+        score_thr=0.05,
+        max_per_img=100,
+        nms=dict(type='nms', iou_threshold=0.5),
     ),
+
 )
+
+# print(teacher_retinanet)
+
+load_checkpoint(teacher_retinanet, teacher_checkpoint, map_location='cpu')
+print(teacher_retinanet.eval())
+
+print(teacher_retinanet.predict(inputs, data_samples))

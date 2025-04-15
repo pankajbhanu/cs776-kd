@@ -4,6 +4,7 @@ import numpy as np
 import torch
 from ...engine.utils import deprecated_api_warning
 from torch import Tensor
+from torchvision.ops import nms
 
 # from ...cv.ops.utils import ext_loader
 
@@ -24,8 +25,10 @@ class NMSop(torch.autograd.Function):
             valid_inds = torch.nonzero(
                 valid_mask, as_tuple=False).squeeze(dim=1)
 
-        inds = ext_module.nms(
-            bboxes, scores, iou_threshold=float(iou_threshold), offset=offset)
+        # inds = ext_module.nms(
+        #     bboxes, scores, iou_threshold=float(iou_threshold), offset=offset)
+        inds = nms(
+            bboxes, scores, iou_threshold=float(iou_threshold))
 
         if max_num > 0:
             inds = inds[:max_num]
@@ -73,8 +76,8 @@ class SoftNMSop(torch.autograd.Function):
 array_like_type = Union[Tensor, np.ndarray]
 
 
-@deprecated_api_warning({'iou_thr': 'iou_threshold'})
-def nms(boxes: array_like_type,
+# @deprecated_api_warning({'iou_thr': 'iou_threshold'})
+def cvnms(boxes: array_like_type,
         scores: array_like_type,
         iou_threshold: float,
         offset: int = 0,
@@ -300,7 +303,9 @@ def batched_nms(boxes: Tensor,
     split_thr = nms_cfg_.pop('split_thr', 10000)
     # Won't split to multiple nms nodes when exporting to onnx
     if boxes_for_nms.shape[0] < split_thr:
-        dets, keep = nms_op(boxes_for_nms, scores, **nms_cfg_)
+        # dets, keep = nms_op(boxes_for_nms, scores, nms_cfg_.get('iou_threshold', 0.5))
+        keep = nms_op(boxes_for_nms, scores, nms_cfg_.get('iou_threshold', 0.5))
+        print(keep)
         boxes = boxes[keep]
 
         # This assumes `dets` has arbitrary dimensions where
@@ -308,7 +313,7 @@ def batched_nms(boxes: Tensor,
         # Currently it supports bounding boxes [x1, y1, x2, y2, score] or
         # rotated boxes [cx, cy, w, h, angle_radian, score].
 
-        scores = dets[:, -1]
+        # scores = dets[:, -1]
     else:
         max_num = nms_cfg_.pop('max_num', -1)
         total_mask = scores.new_zeros(scores.size(), dtype=torch.bool)
@@ -330,7 +335,8 @@ def batched_nms(boxes: Tensor,
             boxes = boxes[:max_num]
             scores = scores[:max_num]
 
-    boxes = torch.cat([boxes, scores[:, None]], -1)
+    # boxes = torch.cat([boxes, scores[:, None]], -1)
+    boxes = torch.cat([boxes], -1)
     return boxes, keep
 
 

@@ -18,20 +18,18 @@ class RetinaNet(SingleStageDetector):
                  backbone: ResNet,
                  neck: FPN,
                  bbox_head: RetinaHead,
-                 assigner: MaxIoUAssigner,
-                 sampler: PseudoSampler,
                  data_preprocessor: DetDataPreprocessor,
                  train_cfg: dict,
                  test_cfg: dict,
                  checkpoint: str = "",
-                 init_cfg: OptMultiConfig = None) -> None:
+                #  init_cfg: OptMultiConfig = None
+                 ) -> None:
         super().__init__(
             backbone=backbone,
             neck=neck,
             bbox_head=bbox_head,
-            assigner=assigner,
-            sampler=sampler,
             train_cfg=train_cfg,
             test_cfg=test_cfg,
             data_preprocessor=data_preprocessor,
-            init_cfg=init_cfg)
+            # init_cfg=init_cfg,
+            checkpoint=checkpoint)

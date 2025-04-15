@@ -428,7 +428,7 @@ print(inputs.shape)                 # (5, 3, 1216, 1248])   B N H W
 
 """
 
-student_resnet = ResNet(
+student_backbone = ResNet(
     depth=18,
     num_stages=4,
     out_indices=(0, 1, 2, 3),
@@ -586,9 +586,9 @@ print(student_bbox_head)
 
 # print(data_samples[0])
 
-loss_cls_kd = KDQualityFocalLoss(beta=1, loss_weight=1.0)
-loss_reg_kd = GIoULoss(loss_weight=1.0)
-reused_teacher_head_index = 3
+
+"""
+
 student_assigner = MaxIoUAssigner(use_sigmoid=True, gamma=2.0, alpha=0.25, loss_weight=1.0)
 syudent_sampler = PseudoSampler()
 student_nms = NMSop(iou_threshold=0.5)
@@ -597,3 +597,54 @@ optim_wrapper = OptimWrapper(
 )
 checkpoint_hook = CheckpointHook(interval=12)
 logger_hook = LoggerHook
+"""
+
+
+
+"""
+
+
+KD
+
+kd_cfg=dict(
+        loss_cls_kd=dict(type='KDQualityFocalLoss', beta=1, loss_weight=1.0),
+        loss_reg_kd=dict(type='GIoULoss', loss_weight=1.0),
+        reused_teacher_head_idx=3),
+
+"""
+
+
+from kd.models.losses import GIoULoss, KDQualityFocalLoss
+
+
+loss_cls_kd = KDQualityFocalLoss(beta=1, loss_weight=1.0)
+loss_reg_kd = GIoULoss(loss_weight=1.0)
+reused_teacher_head_index = 3
+
+
+
+
+
+"""
+detector.
+
+
+"""
+
+
+
+from kd.models.detectors import CrossKDRetinaNetDetector 
+crosskd_detector = CrossKDRetinaNetDetector(
+    backbone=student_backbone,
+    neck = student_neck,
+    bbox_head=student_bbox_head,
+    teacher = None,
+    teacher_ckpt= None,
+    loss_cls_kd=loss_cls_kd,
+    loss_reg_kd=loss_reg_kd,
+    reused_teacher_head_idx=reused_teacher_head_index,
+    train_cfg=None,
+    test_cfg=None,
+    data_preprocessor=data_preprocessor
+)
+

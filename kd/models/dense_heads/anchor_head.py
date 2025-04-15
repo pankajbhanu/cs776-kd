@@ -58,7 +58,7 @@ class AnchorHead(BaseDenseHead):
         reg_decoded_bbox: bool = False,
         feat_channels: int = 256,
         ) -> None:
-        super().__init__()
+        super().__init__(test_cfg)
         self.in_channels = in_channels
         self.num_classes = num_classes
         self.feat_channels = feat_channels
@@ -77,12 +77,8 @@ class AnchorHead(BaseDenseHead):
         self.loss_bbox = loss_bbox
         self.train_cfg = train_cfg
         self.test_cfg = test_cfg
-        # if self.train_cfg:
-        #     self.assigner = self.train_cfg.assigner
-        #     if train_cfg.get('sampler', None) is not None:
-        #         self.sampler = self.train_cfg.sampler
-        #     else:
-        #         self.sampler = PseudoSampler(context=self)
+        self.sampler = sampler
+        self.assigner = assigner
 
         self.fp16_enabled = False
 

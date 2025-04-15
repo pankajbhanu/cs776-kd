@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 from torch import Tensor
 
-from ...structures import bbox_overlaps
+from ...structures.bbox import bbox_overlaps
 from .utils import weighted_loss
 
 

@@ -74,21 +74,23 @@ class CrossKDSingleStageDetector(SingleStageDetector):
         bbox_head: RetinaHead,
         teacher,
         teacher_ckpt,
+        loss_cls_kd,
+        loss_reg_kd,
+        reused_teacher_head_idx,
 
         # teacher_config: Union[ConfigType, str, Path],
-        # teacher_ckpt: Optional[str] = None,
         # kd_cfg: OptConfigType = None,
-        # train_cfg: OptConfigType = None,
-        # test_cfg: OptConfigType = None,
-        # data_preprocessor: OptConfigType = None,
+        train_cfg: OptConfigType = None,
+        test_cfg: OptConfigType = None,
+        data_preprocessor: OptConfigType = None,
     ) -> None:
         super().__init__(
             backbone=backbone,
             neck=neck,
             bbox_head=bbox_head,
-            # train_cfg=train_cfg,
-            # test_cfg=test_cfg,
-            # data_preprocessor=data_preprocessor
+            train_cfg=train_cfg,
+            test_cfg=test_cfg,
+            data_preprocessor=data_preprocessor
         )
 
 
@@ -100,8 +102,8 @@ class CrossKDSingleStageDetector(SingleStageDetector):
         self.teacher = teacher
 
         # TODO: if there is teacher checkpoint (has to load from it)
-        # if teacher_ckpt is not None:
-        #     load_checkpoint(self.teacher, teacher_ckpt, map_location='cpu')
+        if teacher_ckpt is not None:
+            load_checkpoint(self.teacher, teacher_ckpt, map_location='cpu')
 
 
         # In order to reforward teacher model,
@@ -113,19 +115,14 @@ class CrossKDSingleStageDetector(SingleStageDetector):
         # self.loss_reg_kd = MODELS.build(kd_cfg['loss_reg_kd'])             
 
 
-        self.loss_cls_kd = KDQualityFocalLoss(
-            beta=1,
-            loss_weight=1.0
-        )
-        self.loss_reg_kd = GIoULoss(
-            loss_weight=1.0
-        )
+        self.loss_cls_kd = self.loss_cls_kd
+        self.loss_reg_kd = self.loss_reg_kd
 
         # self.with_feat_distill = False
         # if kd_cfg.get('loss_feat_kd', None):
         #     self.loss_feat_kd = MODELS.build(kd_cfg['loss_feat_kd'])
         #     self.with_feat_distill = True
-        self.reused_teacher_head_idx = 3
+        self.reused_teacher_head_idx = self.reused_teacher_head_idx
 
     @staticmethod
     def freeze(model: nn.Module):

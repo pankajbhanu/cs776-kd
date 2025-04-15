@@ -358,6 +358,7 @@ def deprecated_api_warning(name_dict: dict,
 
         @functools.wraps(old_func)
         def new_func(*args, **kwargs):
+            print(old_func)
             # get the arg spec of the decorated method
             args_info = getfullargspec(old_func)
             # get name of the function

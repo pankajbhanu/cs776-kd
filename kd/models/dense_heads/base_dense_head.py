@@ -54,11 +54,12 @@ class BaseDenseHead(BaseModule, metaclass=ABCMeta):
     loss_and_predict(): forward() -> loss_by_feat() -> predict_by_feat()
     """
 
-    def __init__(self, init_cfg: OptMultiConfig = None) -> None:
+    def __init__(self, test_cfg: dict, init_cfg: OptMultiConfig = None) -> None:
         super().__init__(init_cfg=init_cfg)
         # `_raw_positive_infos` will be used in `get_positive_infos`, which
         # can get positive information.
         self._raw_positive_infos = dict()
+        self.test_cfg = test_cfg
 
     def init_weights(self) -> None:
         """Initialize the weights."""
@@ -186,6 +187,7 @@ class BaseDenseHead(BaseModule, metaclass=ABCMeta):
 
         outs = self(x)
 
+        print(self.test_cfg)
         predictions = self.predict_by_feat(
             *outs, batch_img_metas=batch_img_metas, rescale=rescale)
         return predictions
@@ -195,7 +197,7 @@ class BaseDenseHead(BaseModule, metaclass=ABCMeta):
                         bbox_preds: List[Tensor],
                         score_factors: Optional[List[Tensor]] = None,
                         batch_img_metas: Optional[List[dict]] = None,
-                        cfg: Optional[dict] = None,
+                        cfg: dict = {},
                         rescale: bool = False,
                         with_nms: bool = True) -> InstanceList:
         """Transform a batch of output features extracted from the head into
@@ -286,7 +288,7 @@ class BaseDenseHead(BaseModule, metaclass=ABCMeta):
                                 score_factor_list: List[Tensor],
                                 mlvl_priors: List[Tensor],
                                 img_meta: dict,
-                                cfg: dict,
+                                cfg:dict = dict(),
                                 rescale: bool = False,
                                 with_nms: bool = True) -> InstanceData:
         """Transform a single image's features extracted from the head into
@@ -337,6 +339,13 @@ class BaseDenseHead(BaseModule, metaclass=ABCMeta):
 
         cfg = self.test_cfg if cfg is None else cfg
         cfg = copy.deepcopy(cfg)
+        cfg = dict(
+        nms_pre=1000,
+        min_bbox_size=0,
+        score_thr=0.05,
+        max_per_img=100,
+        nms=dict(type='nms', iou_threshold=0.5),
+        )
         img_shape = img_meta['img_shape']
         nms_pre = cfg.get('nms_pre', -1)
 
@@ -406,6 +415,7 @@ class BaseDenseHead(BaseModule, metaclass=ABCMeta):
         if with_score_factors:
             results.score_factors = torch.cat(mlvl_score_factors)
 
+        print(self.test_cfg)
         return self._bbox_post_process(
             results=results,
             cfg=cfg,
@@ -459,20 +469,24 @@ class BaseDenseHead(BaseModule, metaclass=ABCMeta):
             results.scores = results.scores * score_factors
 
         # filter small size bboxes
+        cfg['min_bbox_size'] = 0
+        print('cfg', cfg)
+        print('results', results)
         if cfg.get('min_bbox_size', -1) >= 0:
             w, h = get_box_wh(results.bboxes)
-            valid_mask = (w > cfg.min_bbox_size) & (h > cfg.min_bbox_size)
+            valid_mask = (w > cfg.get('min_bbox_size', 0)) & (h > cfg.get('min_bbox_size', 0))
             if not valid_mask.all():
                 results = results[valid_mask]
 
         # TODO: deal with `with_nms` and `nms_cfg=None` in test_cfg
         if with_nms and results.bboxes.numel() > 0:
             bboxes = get_box_tensor(results.bboxes)
+            print(cfg)
             det_bboxes, keep_idxs = batched_nms(bboxes, results.scores,
-                                                results.labels, cfg.nms)
+                                                results.labels, cfg['nms'])
             results = results[keep_idxs]
             # some nms would reweight the score, such as softnms
             results.scores = det_bboxes[:, -1]
-            results = results[:cfg.max_per_img]
+            results = results[:cfg.get('max_per_img',100)]
 
         return results
