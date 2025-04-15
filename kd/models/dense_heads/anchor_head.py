@@ -6,6 +6,7 @@ import torch
 import torch.nn as nn
 
 from kd.models.detutils.typing_utils import OptConfigType
+from kd.models.task_modules.assigners.max_iou_assigner import MaxIoUAssigner
 from ..structures.instance_data import InstanceData
 from torch import Tensor
 
@@ -50,6 +51,8 @@ class AnchorHead(BaseDenseHead):
         bbox_coder: DeltaXYWHBBoxCoder,
         loss_cls: CrossEntropyLoss,
         loss_bbox: SmoothL1Loss,
+        assigner: MaxIoUAssigner,
+        sampler: PseudoSampler,
         train_cfg: OptConfigType=None,
         test_cfg: OptConfigType=None,
         reg_decoded_bbox: bool = False,
@@ -70,16 +73,16 @@ class AnchorHead(BaseDenseHead):
         self.reg_decoded_bbox = reg_decoded_bbox
 
         self.bbox_coder = bbox_coder
-        self.loss_cls = loss_cls 
+        self.loss_cls = loss_cls
         self.loss_bbox = loss_bbox
         self.train_cfg = train_cfg
         self.test_cfg = test_cfg
-        if self.train_cfg:
-            self.assigner = self.train_cfg.assigner
-            if train_cfg.get('sampler', None) is not None:
-                self.sampler = self.train_cfg.sampler
-            else:
-                self.sampler = PseudoSampler(context=self)
+        # if self.train_cfg:
+        #     self.assigner = self.train_cfg.assigner
+        #     if train_cfg.get('sampler', None) is not None:
+        #         self.sampler = self.train_cfg.sampler
+        #     else:
+        #         self.sampler = PseudoSampler(context=self)
 
         self.fp16_enabled = False
 

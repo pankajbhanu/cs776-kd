@@ -1,10 +1,13 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Optional
+from torch import Tensor
+from kd.models.data_preprocessors.data_preprocessor import DetDataPreprocessor
+from kd.models.task_modules.assigners.max_iou_assigner import MaxIoUAssigner
+from kd.models.task_modules.samplers.pseudo_sampler import PseudoSampler
 
-from torch import Tensor, nn
 
-
-from ..structures import OptSampleList, SampleList
+from ..structures import SampleList
+from ..detutils import OptMultiConfig
 from .base import BaseDetector
 
 from ..backbones import ResNet
@@ -25,10 +28,13 @@ class SingleStageDetector(BaseDetector):
             backbone: ResNet,
             neck: FPN,
             bbox_head: RetinaHead,
-            # train_cfg: dict = None,
-            # test_cfg: dict = None,
-            data_preprocessor: dict = None,
-            #  init_cfg: OptMultiConfig = None
+            assigner: MaxIoUAssigner,
+            sampler: PseudoSampler,
+            data_preprocessor: DetDataPreprocessor,
+            train_cfg: dict,
+            test_cfg: dict,
+            checkpoint: str = "",
+            init_cfg: OptMultiConfig = None
             )-> None:
         super().__init__(
             data_preprocessor=data_preprocessor,
@@ -46,8 +52,8 @@ class SingleStageDetector(BaseDetector):
         # bbox_head.update(train_cfg=train_cfg)
         # bbox_head.update(test_cfg=test_cfg)
         # self.bbox_head = MODELS.build(bbox_head)
-        # self.train_cfg = train_cfg
-        # self.test_cfg = test_cfg
+        self.train_cfg = train_cfg
+        self.test_cfg = test_cfg
 
     # def _load_from_state_dict(self, state_dict: dict, prefix: str,
     #                           local_metadata: dict, strict: bool,
@@ -74,9 +80,8 @@ class SingleStageDetector(BaseDetector):
     #                                   error_msgs)
 
     def loss(self, batch_inputs: Tensor,
-            #  batch_data_samples: SampleList
-             batch_data_samples
-             ) -> Union[dict, list]:
+             batch_data_samples: SampleList,
+             ) -> Union[dict, tuple]:
         """Calculate losses from a batch of inputs and data samples.
 
         Args:
@@ -134,7 +139,7 @@ class SingleStageDetector(BaseDetector):
     def _forward(
             self,
             batch_inputs: Tensor,
-            # batch_data_samples: OptSampleList = None
+            batch_data_samples: Optional[SampleList] = None
             ) -> Tuple[List[Tensor]]:
         """Network forward process. Usually includes backbone, neck and head
         forward without any post-processing.

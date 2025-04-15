@@ -9,11 +9,15 @@ from kd.engine.dataset import DefaultSampler, pseudo_collate
 from kd.models.data_preprocessors.data_preprocessor import DetDataPreprocessor
 from kd.models.backbones import ResNet
 from kd.models.detectors.crosskd_retinanet_detector import CrossKDRetinaNetDetector
+from kd.models.detectors.single_stage_detector import SingleStageDetector
+from kd.models.detectors.retinanet import RetinaNet
 from kd.models.necks import FPN
+from kd.models.task_modules.assigners.max_iou_assigner import MaxIoUAssigner
 from kd.models.task_modules.prior_generators import AnchorGenerator
 from kd.models.task_modules.coders import DeltaXYWHBBoxCoder
 from kd.models.losses import FocalLoss, L1Loss, GIoULoss, KDQualityFocalLoss
 from kd.models.dense_heads import RetinaHead
+from kd.models.task_modules.samplers.pseudo_sampler import PseudoSampler
 """
 ---------------1. dataset
 """
@@ -275,12 +279,31 @@ teacher_bbox_head = RetinaHead(
     feat_channels=256,
 )
 
-teacher_retinanet = CrossKDRetinaNetDetector(
+teacher_assigner = MaxIoUAssigner(
+    pos_iou_thr=0.5,
+    neg_iou_thr=0.4,
+    min_pos_iou=0,
+    ignore_iof_thr=-1
+)
+
+
+teacher_retinanet = RetinaNet(
     backbone=teacher_resnet,
     neck=teacher_neck,
     bbox_head=teacher_bbox_head,
     data_preprocessor=data_preprocessor,
-    train_cfg=None,
-    test_cfg=None,
-    pretrained=None,
+    checkpoint="",
+    assigner=teacher_assigner,
+    sampler=PseudoSampler(),
+    train_cfg=dict(
+        allowed_border=-1,
+        pos_weight=-1,
+        debug=False
+    ),
+    test_cfg=dict(
+       nms_pre=1000,
+      min_bbox_size=0,
+     score_thr=0.05,
+    max_per_img=100
+    ),
 )
