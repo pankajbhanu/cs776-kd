@@ -17,7 +17,7 @@ data/
 *.muh
 **/csrc
 .Ds_Store
-**dataset
+tools/dataset
 **.txt
 **.egg-info
 **.bak
