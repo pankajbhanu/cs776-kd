@@ -6,10 +6,10 @@ from ...engine.utils import deprecated_api_warning
 from torch import Tensor
 from torchvision.ops import nms
 
-# from ...cv.ops.utils import ext_loader
+from ...cv.utils import ext_loader
 
-# ext_module = ext_loader.load_ext(
-#     '_ext', ['nms', 'softnms', 'nms_match', 'nms_rotated', 'nms_quadri'])
+ext_module = ext_loader.load_ext(
+    '_ext', ['nms', 'softnms', 'nms_match', 'nms_rotated', 'nms_quadri'])
 
 
 # This function is modified from: https://github.com/pytorch/vision/
@@ -303,9 +303,9 @@ def batched_nms(boxes: Tensor,
     split_thr = nms_cfg_.pop('split_thr', 10000)
     # Won't split to multiple nms nodes when exporting to onnx
     if boxes_for_nms.shape[0] < split_thr:
-        # dets, keep = nms_op(boxes_for_nms, scores, nms_cfg_.get('iou_threshold', 0.5))
-        keep = nms_op(boxes_for_nms, scores, nms_cfg_.get('iou_threshold', 0.5))
-        print(keep)
+        dets, keep = nms_op(boxes_for_nms, scores, **nms_cfg_)
+        # keep = nms_op(boxes_for_nms, scores, nms_cfg_.get('iou_threshold', 0.5))
+        # print(keep)
         boxes = boxes[keep]
 
         # This assumes `dets` has arbitrary dimensions where
@@ -313,7 +313,7 @@ def batched_nms(boxes: Tensor,
         # Currently it supports bounding boxes [x1, y1, x2, y2, score] or
         # rotated boxes [cx, cy, w, h, angle_radian, score].
 
-        # scores = dets[:, -1]
+        scores = dets[:, -1]
     else:
         max_num = nms_cfg_.pop('max_num', -1)
         total_mask = scores.new_zeros(scores.size(), dtype=torch.bool)
